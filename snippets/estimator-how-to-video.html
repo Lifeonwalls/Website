@@ -1,0 +1,72 @@
+<!--
+  Estimator "How to use" video section
+  Page: Living Wall Estimate Generator (/living-wall-estimate-generator/), WPCode snippet #4570
+  Paste directly AFTER the closing </section> of the Hero section
+  (i.e. just before <section data-screen-label="Systems" ...>).
+
+  Performance: the video uses preload="none", so no video bytes are downloaded until the
+  visitor presses play. The poster reuses the hero background image (already loaded above),
+  so this section adds no extra image requests either.
+-->
+<section id="how-to-use" data-screen-label="How to use" aria-labelledby="lw-howto-title" style="background:#F2F1EA;color:#0B0F0B;border-bottom:1px solid rgba(63,78,10,.16);padding:clamp(70px,9vw,130px) clamp(18px,4vw,56px)">
+  <style>
+    .lw-howto-frame{position:relative;aspect-ratio:16/9;width:100%;border-radius:14px;overflow:hidden;background:#0B0F0B;box-shadow:0 30px 70px -30px rgba(11,15,11,.45)}
+    .lw-howto-frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0B0F0B}
+    .lw-howto-play{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;border:0;padding:0;cursor:pointer;color:#F2F1EA;background:linear-gradient(180deg,rgba(11,15,11,.35) 0%,rgba(11,15,11,.7) 100%);font:inherit;transition:background .3s}
+    .lw-howto-play:hover{background:linear-gradient(180deg,rgba(11,15,11,.25) 0%,rgba(11,15,11,.6) 100%)}
+    .lw-howto-play:focus-visible{outline:3px solid #9BB222;outline-offset:-6px}
+    .lw-howto-icon{display:grid;place-items:center;width:clamp(64px,8vw,96px);height:clamp(64px,8vw,96px);border-radius:50%;background:#9BB222;color:#0B0F0B;transition:transform .3s}
+    .lw-howto-play:hover .lw-howto-icon{transform:scale(1.07)}
+    .lw-howto-icon svg{width:38%;height:38%;margin-left:8%}
+    /* ID-scoped !important so the theme's ".low-root span{color:inherit!important}" can't override */
+    #how-to-use .lw-howto-play,#how-to-use .lw-howto-label{color:#F2F1EA!important}
+    #how-to-use .lw-howto-icon{color:#0B0F0B!important}
+    .lw-howto-label{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600}
+    .lw-howto-frame.is-playing .lw-howto-play{display:none}
+    @media (max-width:520px){.lw-howto-label{display:none}}
+    @media (prefers-reduced-motion:reduce){.lw-howto-icon,.lw-howto-play{transition:none}}
+  </style>
+  <div style="max-width:1500px;margin:0 auto">
+    <p data-fade style="display:flex;align-items:center;gap:14px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#3F4E0A;margin-bottom:18px"><span style="display:inline-block;width:38px;height:1px;background:#9BB222"></span>Video guide · 2 min</p>
+    <h2 id="lw-howto-title" data-split style="font-family:var(--d);font-weight:300;font-size:clamp(30px,4.4vw,66px);line-height:1.04;letter-spacing:-.015em;max-width:24ch;text-wrap:balance;margin:0">How to Use Our Living Wall Cost Estimator</h2>
+    <p data-fade style="margin-top:clamp(18px,2vw,26px);font-size:clamp(16px,1.2vw,19px);line-height:1.55;color:#3A3F36;max-width:60ch;text-wrap:pretty">Watch our step-by-step video guide to see how easy it is to use the Life on Walls Cost Estimator and get an initial quote for your living wall project.</p>
+    <div data-fade style="margin-top:clamp(34px,4vw,60px);max-width:1200px">
+      <div class="lw-howto-frame" id="lw-howto-frame">
+        <video id="lw-howto-video" playsinline preload="none"
+          poster="https://lifeonwalls.co.uk/wp-content/uploads/2026/07/Gemini_Generated_Image_1ljum71ljum71lju-1024x559.webp"
+          aria-label="Video: how to use the Life on Walls living wall cost estimator">
+          <source src="https://lifeonwalls.co.uk/wp-content/uploads/2026/11/Life_on_Walls_Estimator_Walkthrough-1.mp4" type="video/mp4">
+          Your browser does not support HTML5 video. <a href="https://lifeonwalls.co.uk/wp-content/uploads/2026/11/Life_on_Walls_Estimator_Walkthrough-1.mp4">Download the estimator walkthrough video</a>.
+        </video>
+        <button type="button" class="lw-howto-play" id="lw-howto-play" aria-label="Play the estimator video guide (2 minutes 22 seconds)">
+          <span class="lw-howto-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L7.5 3.64A1 1 0 0 0 6 4.5z"/></svg></span>
+          <span class="lw-howto-label">Watch the guide · 2:22</span>
+        </button>
+        <noscript><style>.lw-howto-play{display:none}</style><a href="https://lifeonwalls.co.uk/wp-content/uploads/2026/11/Life_on_Walls_Estimator_Walkthrough-1.mp4" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#F2F1EA">Watch the estimator video guide</a></noscript>
+      </div>
+      <p style="margin-top:18px;font-size:14px;color:#5A6055">Ready to try it? <a href="#calculator" style="color:#3F4E0A;text-decoration:underline;text-underline-offset:3px">Jump to the estimator</a>.</p>
+    </div>
+  </div>
+  <script>
+    (function(){
+      var f=document.getElementById('lw-howto-frame'),v=document.getElementById('lw-howto-video'),b=document.getElementById('lw-howto-play');
+      if(!f||!v||!b)return;
+      b.addEventListener('click',function(){v.controls=true;f.classList.add('is-playing');var p=v.play();if(p&&p.catch)p.catch(function(){});v.focus();});
+      v.addEventListener('play',function(){v.controls=true;f.classList.add('is-playing');});
+    })();
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"VideoObject",
+    "name":"How to Use Our Living Wall Cost Estimator",
+    "description":"Watch our step-by-step video guide to see how easy it is to use the Life on Walls Cost Estimator and get an initial quote for your living wall project.",
+    "thumbnailUrl":"https://lifeonwalls.co.uk/wp-content/uploads/2026/07/Gemini_Generated_Image_1ljum71ljum71lju-1024x559.webp",
+    "uploadDate":"2026-11-05",
+    "duration":"PT2M22S",
+    "contentUrl":"https://lifeonwalls.co.uk/wp-content/uploads/2026/11/Life_on_Walls_Estimator_Walkthrough-1.mp4",
+    "embedUrl":"https://lifeonwalls.co.uk/living-wall-estimate-generator/#how-to-use",
+    "publisher":{"@type":"Organization","name":"Life on Walls","url":"https://lifeonwalls.co.uk/"}
+  }
+  </script>
+</section>
