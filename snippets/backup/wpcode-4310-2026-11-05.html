@@ -1,0 +1,108 @@
+add_action( 'wp_head', function () {
+    ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": ["Organization", "LocalBusiness", "ProfessionalService"],
+      "@id": "https://lifeonwalls.co.uk/#organization",
+      "name": "Life on Walls",
+      "legalName": "Green Lease Ltd",
+      "url": "https://lifeonwalls.co.uk/",
+      "logo": "https://lifeonwalls.co.uk/wp-content/uploads/2025/07/cropped-Life-on-Walls-logo-colour-green-270x270.jpg",
+      "image": "https://lifeonwalls.co.uk/wp-content/uploads/2025/10/RHS-Case-Study-min.png",
+      "description": "Life on Walls designs, installs, and maintains living walls and green wall systems for residential and commercial projects across the UK, combining horticultural expertise with engineered irrigation and structural systems.",
+      "email": "info@lifeonwalls.co.uk",
+      "telephone": "+44 1202 045490",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "2-4 Gatton Road",
+        "addressLocality": "London",
+        "addressRegion": "England",
+        "postalCode": "SW17 0SQ",
+        "addressCountry": "GB"
+      },
+      "identifier": [
+        { "@type": "PropertyValue", "name": "UK Company Number", "value": "08368146" },
+        { "@type": "PropertyValue", "name": "Registered Office Address", "value": "21 Knaresborough Drive, London, England, SW18 4UT" }
+      ],
+      "areaServed": { "@type": "Country", "name": "United Kingdom" },
+      "sameAs": [
+        "https://www.linkedin.com/company/life-on-walls",
+        "https://www.instagram.com/life_on_walls_uk/", "https://www.freeindex.co.uk/profile(life-on-walls)_851933.htm", "https://www.buildingdesignindex.co.uk/company/700830/Life-on-Walls/"
+      ],
+      "founder": { "@id": "https://lifeonwalls.co.uk/#armando-raish" },
+      "employee": [
+        { "@id": "https://lifeonwalls.co.uk/#armando-raish" },
+        { "@id": "https://lifeonwalls.co.uk/#anja-spice" },
+        { "@id": "https://lifeonwalls.co.uk/#david-tarsh" },
+        { "@id": "https://lifeonwalls.co.uk/#arnau-romero" }
+      ],
+      "makesOffer": [
+        { "@id": "https://lifeonwalls.co.uk/#service-design" },
+        { "@id": "https://lifeonwalls.co.uk/#service-maintenance" },
+        { "@id": "https://lifeonwalls.co.uk/#service-supply" },
+        { "@id": "https://lifeonwalls.co.uk/#offer-channel-pro" },
+        { "@id": "https://lifeonwalls.co.uk/#offer-living-louvres" }
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+44 1202 045490",
+        "email": "info@lifeonwalls.co.uk",
+        "contactType": "customer service",
+        "areaServed": "GB",
+        "availableLanguage": "English"
+      }
+    },
+    { "@type": "Person", "@id": "https://lifeonwalls.co.uk/#armando-raish", "name": "Armando Raish", "jobTitle": "CEO & Founder", "worksFor": { "@id": "https://lifeonwalls.co.uk/#organization" } },
+    { "@type": "Person", "@id": "https://lifeonwalls.co.uk/#anja-spice", "name": "Anja Spice", "jobTitle": "Marketing Director", "worksFor": { "@id": "https://lifeonwalls.co.uk/#organization" } },
+    { "@type": "Person", "@id": "https://lifeonwalls.co.uk/#david-tarsh", "name": "David Tarsh", "jobTitle": "Strategic Advisor", "worksFor": { "@id": "https://lifeonwalls.co.uk/#organization" } },
+    { "@type": "Person", "@id": "https://lifeonwalls.co.uk/#arnau-romero", "name": "Arnau Romero", "jobTitle": "IT & Operations", "worksFor": { "@id": "https://lifeonwalls.co.uk/#organization" } },
+    { "@type": "WebSite", "@id": "https://lifeonwalls.co.uk/#website", "url": "https://lifeonwalls.co.uk/", "name": "Life on Walls", "publisher": { "@id": "https://lifeonwalls.co.uk/#organization" }, "inLanguage": "en-GB" },
+    { "@type": "Service", "@id": "https://lifeonwalls.co.uk/#service-design", "name": "Living Wall Design, Installation & Consultation", "serviceType": "Living wall and green wall design and installation", "provider": { "@id": "https://lifeonwalls.co.uk/#organization" }, "areaServed": { "@type": "Country", "name": "United Kingdom" }, "audience": { "@type": "Audience", "audienceType": "Architects, property developers, interior designers" }, "description": "End-to-end design, planting, irrigation, and installation of bespoke indoor and outdoor living walls for residential and commercial projects." },
+    { "@type": "Service", "@id": "https://lifeonwalls.co.uk/#service-maintenance", "name": "Living Wall Maintenance", "serviceType": "Living wall maintenance", "provider": { "@id": "https://lifeonwalls.co.uk/#organization" }, "areaServed": { "@type": "Country", "name": "United Kingdom" }, "description": "Ongoing horticultural maintenance for installed living walls, including inspection, irrigation servicing, and plant health management." },
+    { "@type": "Service", "@id": "https://lifeonwalls.co.uk/#service-supply", "name": "Living Wall Systems & Products", "serviceType": "Supply of engineered living wall planter systems", "provider": { "@id": "https://lifeonwalls.co.uk/#organization" }, "areaServed": { "@type": "Country", "name": "United Kingdom" }, "description": "Engineered living wall planter systems, including the Channel Pro System and the Living Louvres System — both IP-protected, UK-manufactured aluminium living wall systems available to specify and purchase." },
+    {
+      "@type": "Product",
+      "@id": "https://lifeonwalls.co.uk/#product-channel-pro",
+      "name": "Channel Pro® living wall system",
+      "description": "IP-protected, UK-manufactured aluminium channel living wall system, planted at 36–42 plants per square metre.",
+      "brand": { "@type": "Brand", "name": "Life on Walls" },
+      "manufacturer": { "@id": "https://lifeonwalls.co.uk/#organization" },
+      "offers": { "@id": "https://lifeonwalls.co.uk/#offer-channel-pro" }
+    },
+    {
+      "@type": "Offer",
+      "@id": "https://lifeonwalls.co.uk/#offer-channel-pro",
+      "itemOffered": { "@id": "https://lifeonwalls.co.uk/#product-channel-pro" },
+      "seller": { "@id": "https://lifeonwalls.co.uk/#organization" },
+      "priceCurrency": "GBP",
+      "price": "264.00",
+      "priceSpecification": { "@type": "UnitPriceSpecification", "price": "264.00", "priceCurrency": "GBP", "unitCode": "MTK", "unitText": "per square metre", "valueAddedTaxIncluded": false },
+      "areaServed": { "@type": "Country", "name": "United Kingdom" }
+    },
+    {
+      "@type": "Product",
+      "@id": "https://lifeonwalls.co.uk/#product-living-louvres",
+      "name": "Living Louvres® living wall system",
+      "description": "IP-protected, UK-manufactured aluminium louvre living wall system for walls 1200 mm high and above.",
+      "brand": { "@type": "Brand", "name": "Life on Walls" },
+      "manufacturer": { "@id": "https://lifeonwalls.co.uk/#organization" },
+      "offers": { "@id": "https://lifeonwalls.co.uk/#offer-living-louvres" }
+    },
+    {
+      "@type": "Offer",
+      "@id": "https://lifeonwalls.co.uk/#offer-living-louvres",
+      "itemOffered": { "@id": "https://lifeonwalls.co.uk/#product-living-louvres" },
+      "seller": { "@id": "https://lifeonwalls.co.uk/#organization" },
+      "priceCurrency": "GBP",
+      "price": "220.00",
+      "priceSpecification": { "@type": "UnitPriceSpecification", "price": "220.00", "priceCurrency": "GBP", "unitCode": "MTK", "unitText": "per square metre", "valueAddedTaxIncluded": false },
+      "areaServed": { "@type": "Country", "name": "United Kingdom" }
+    }
+  ]
+}
+</script>
+    <?php
+}, 1 );

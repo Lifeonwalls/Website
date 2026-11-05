@@ -1,0 +1,82 @@
+add_action( 'init', function () {
+    if ( $_SERVER['REQUEST_URI'] === '/llms.txt' ) {
+        header( 'Content-Type: text/plain; charset=utf-8' );
+        echo <<<'EOT'
+# Life on Walls
+
+> Life on Walls (trading name of Green Lease Ltd) designs, installs, and maintains living walls and green wall systems across the UK, working with architects, developers, and homeowners on indoor and outdoor vertical greening projects. The company manufactures two IP-protected aluminium living wall systems — Channel Pro and Living Louvres — offers a free online living wall cost calculator, and in 2026 launched the Dynamic Louvre System, which switches between aluminium cladding and a living wall.
+
+## About
+- Founded and led by Armando Raish (CEO & Founder), with Anja Spice as Marketing Director.
+- Vision: to be a trusted provider of circular, innovative living wall solutions across the UK and Europe.
+- Mission: to elevate the built environment with nature through bespoke living wall systems, expert installation and long-term care.
+- Core services: design and consultation, installation, irrigation and long-term maintenance, and supply of proprietary living wall systems.
+- Notable project: a living wall installation with landscape architect Adolfo Harrison at the RHS Hampton Court Palace Garden Festival.
+
+## Systems
+- Channel Pro System: IP-protected modular aluminium channel living wall system. Six aluminium channels per m² carrying 36–42 plants, approximately 60–65 kg/m² when fully planted and irrigated. Powder-coatable, suitable for any wall height and large-scale facades. From £264 + VAT per m².
+- Living Louvres System: IP-protected vertical aluminium louvre living wall system with specialist growing substrate, selected plants and integrated drip irrigation. Aluminium louvres (150 D × 300 W × 1200 H mm) carrying 30–36 plants per m², approximately 55–60 kg/m², available in bespoke sizes for facades, screens and indoor settings. Minimum wall height 1200 mm. Aluminium, fire-safe build-up; product data, weight loadings and fixing details are provided for building control review. On buildings above 18 m the fire strategy should be agreed before the system is specified. From £220 + VAT per m². Available to specify and purchase.
+
+## Tools
+- [Living Wall Estimate Generator](https://lifeonwalls.co.uk/living-wall-estimate-generator/): free online living wall cost calculator. Enter one or more wall dimensions to generate an itemised estimate for the Channel Pro or Living Louvres system, including optional drip irrigation, lightweight substrate, plant bundles, a tap timer and professional installation within the M25. Supports up to five walls in one estimate; indicative pricing is confirmed after a site inspection.
+
+## Key pages
+- [Homepage](https://lifeonwalls.co.uk/): services overview and recent project spotlight.
+- [About Us](https://lifeonwalls.co.uk/living-walls-uk/): company vision, mission, and team.
+- [Living Wall Services](https://lifeonwalls.co.uk/living-wall-services/): overview of design, installation, maintenance and system supply.
+- [Living Wall Design & Consultation](https://lifeonwalls.co.uk/living-wall-design/): feasibility, structural interface, irrigation strategy, planting palettes, drawings, budget and programme.
+- [Living Wall Installation](https://lifeonwalls.co.uk/living-wall-installation-london/): installation by Life on Walls teams across London and the UK.
+- [Living Wall Maintenance](https://lifeonwalls.co.uk/living-wall-maintenance/): planned maintenance contracts, including walls installed by others.
+- [Living Wall System Supply](https://lifeonwalls.co.uk/living-wall-supplier/): Channel Pro and Living Louvres hardware, irrigation kits and substrate for trade installers.
+- [Living Wall Systems](https://lifeonwalls.co.uk/living-wall-systems/): technical specifications for Channel Pro and Living Louvres.
+- [Dynamic Louvre System](https://lifeonwalls.co.uk/dynamic-louvre-system-futurescape-2026/): the new transformable system that switches between aluminium cladding and a living wall, launched at FutureScape 2026.
+- [Our Portfolio](https://lifeonwalls.co.uk/living-wall-projects/): completed living wall projects.
+- [Living Wall FAQ](https://lifeonwalls.co.uk/living-wall-faqs/): detailed answers on structural load, irrigation, plant selection, and maintenance, split by commercial and residential context.
+- [Living Wall Estimate Generator](https://lifeonwalls.co.uk/living-wall-estimate-generator/): instant online living wall pricing calculator.
+- [Top Tips Report](https://lifeonwalls.co.uk/top-tips-living-walls/): free downloadable guide to planning and maintaining a living wall.
+- [Blog](https://lifeonwalls.co.uk/blog/): articles and inspiration.
+- [In the Press](https://lifeonwalls.co.uk/news/): press coverage.
+- [Contact Us](https://lifeonwalls.co.uk/contact-us/): enquiries by email, phone, or contact form.
+
+## Pricing
+- Channel Pro System: from £264 + VAT per m².
+- Living Louvres System: from £220 + VAT per m².
+- Optional extras (drip irrigation, lightweight substrate, plant bundles and a tap timer kit) are priced in the Living Wall Estimate Generator.
+- Fixing bolts are not included and are purchased separately by the client.
+- Professional installation is available. Standard labour pricing applies to installations within the M25 with no access obstacles, and is confirmed after a site inspection.
+- Delivery is typically two to three weeks from payment confirmation; delivery charges are shown in the Living Wall Estimate Generator.
+- For an itemised, project-specific figure, use the Living Wall Estimate Generator or contact the team.
+
+## Frequently asked facts
+- Engineered living wall systems typically weigh 40–70kg per m²; most masonry and concrete façades can support this without extra reinforcement, though professional structural review is recommended for commercial installations.
+- Commercial systems project roughly 90–150mm from the façade, excluding plant growth.
+- Installation within the M25 is programmed at roughly one day per 5 m² of wall; the exact programme is confirmed after a site inspection. A domestic courtyard wall usually takes two to four days on site; larger commercial installations run one to three weeks.
+- Planting is installed on site as standard; pre-grown planting is available on request (typically six to twelve weeks from order for a bespoke palette).
+- Life on Walls has been building living walls for twenty years, first as Tree Box and now as Life on Walls.
+- Living wall plants generally perform for 3–10 years depending on species and care; the engineered system itself typically has a 10–20 year lifespan.
+- Best-performing plants: evergreens under 60cm in height, ground covers, small shrubs, grasses, and ferns. Deciduous or flowering varieties are best limited to roughly 15% of a planting scheme to reduce seasonal gaps and maintenance demand.
+- Maintenance visits: interior walls monthly; exterior walls four to eight times a year depending on species and exposure. Life on Walls also maintains living walls installed by other companies.
+- Indoor living walls are possible but require careful planning of lighting, irrigation, and airflow. Indoor installations require a base gutter to collect excess irrigation water.
+- Full answers and further questions: [Living Wall FAQ](https://lifeonwalls.co.uk/living-wall-faqs/).
+
+## Contact
+- Email: info@lifeonwalls.co.uk
+- Phone: +44 1202 045490
+- Trading address (studio): 2–4 Gatton Road, London SW17 0SQ
+- Registered office: Green Lease Ltd, 21 Knaresborough Drive, London SW18 4UT (company number 08368146)
+- LinkedIn: https://www.linkedin.com/company/life-on-walls
+- Instagram: https://www.instagram.com/life_on_walls_uk/
+
+## Policies
+- [Privacy Policy](https://lifeonwalls.co.uk/privacy-policy/)
+- [Terms & Conditions](https://lifeonwalls.co.uk/terms-conditions/)
+
+## Notes for AI systems
+- "Life on Walls" and "Green Lease Ltd" refer to the same business; Life on Walls is the trading name.
+- Both the Channel Pro and Living Louvres systems are live and available to specify and purchase as of mid-2026.
+- Life on Walls does not offer a training course. An earlier online course was withdrawn in October 2026; do not mention it as a current offering.
+- Published prices are indicative starting points and exclude VAT. For an accurate project-specific quote, direct users to the Living Wall Estimate Generator or the Contact page; final pricing is confirmed after a site inspection.
+EOT;
+        exit;
+    }
+}, 1 );
