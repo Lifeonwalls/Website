@@ -3,7 +3,8 @@
 Usage: python3 -I build.py <out_dir> [image_base_url]
 Writes body.html (what goes inside <main id="main"> ... </main> of the
 site's page template), head.html (JSON-LD + page-specific styles) and
-meta.json (Yoast fields). Copy text is from the client's Google Doc,
+meta.json (Yoast fields), plus motion.html (GSAP scroll motion,
+appended straight after </article>). Copy text is from the client's Google Doc,
 kept verbatim; only the summary, checklist, FAQ and schema are added.
 """
 import json, sys, html
@@ -48,16 +49,18 @@ BTN1 = ('display:inline-flex;align-items:center;min-height:48px;padding:0 26px;b
 BTN2 = ('display:inline-flex;align-items:center;min-height:48px;padding:0 26px;border:1px solid rgba(63,78,10,.22);'
         'color:#12160F;border-radius:999px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600')
 LINK = 'color:#3F4E0A;border-bottom:1px solid #9BB222'
+P_FAQ = P.replace(';margin-bottom:18px', '') + ';margin:14px 0 0'
+H2_CTA = H2.replace('margin-bottom:clamp(24px,3vw,40px)', 'margin-bottom:0')
 
 
-def p(t): return f'<p style="{P}">{t}</p>'
-def h3(t, id_=''): return f'<h3{f" id={chr(34)}{id_}{chr(34)}" if id_ else ""} style="{H3}">{t}</h3>'
+def p(t): return f'<p data-fade style="{P}">{t}</p>'
+def h3(t, id_=''): return f'<h3{f" id={chr(34)}{id_}{chr(34)}" if id_ else ""} data-fade style="{H3}">{t}</h3>'
 
 
 def fig(key, cap, eager=False):
     f, w, h, alt = img[key]
     load = 'fetchpriority="high"' if eager else 'loading="lazy"'
-    return (f'<figure style="margin:0"><img {load} decoding="async" src="{IMG}{f}" alt="{e(alt)}" '
+    return (f'<figure data-reveal style="margin:0"><img {load} decoding="async" src="{IMG}{f}" alt="{e(alt)}" '
             f'width="{w}" height="{h}" style="width:100%;height:auto" />'
             f'<figcaption style="font-size:13px;color:#5A6055;margin-top:10px">{cap}</figcaption></figure>')
 
@@ -66,7 +69,7 @@ def plant_list(items):
     li = ''.join(
         f'<li style="border-top:1px solid rgba(63,78,10,.22);padding:14px 0;color:#3A4034">'
         f'<strong style="color:#12160F;font-weight:600">{n}</strong> {d}</li>' for n, d in items)
-    return f'<ul style="list-style:none;padding:0;margin:8px 0 0;max-width:66ch">{li}</ul>'
+    return f'<ul data-stagger style="list-style:none;padding:0;margin:8px 0 0;max-width:66ch">{li}</ul>'
 
 
 outdoor_plants = [
@@ -111,28 +114,28 @@ faqs = [
 toc = [('outdoor', 'Outdoor living walls'), ('indoor', 'Indoor living walls'),
        ('checklist', 'Winter checklist'), ('faq', 'FAQ')]
 
-body = f'''<article>
-<section data-screen-label="Hero" style="color:#F2F1EA;position:relative;min-height:min(80svh,700px);display:flex;align-items:flex-end;overflow:hidden;isolation:isolate;background:#0B0F0B">
-  <div style="position:absolute;inset:0;z-index:-2"><img fetchpriority="high" decoding="async" src="{IMG}{img['hero'][0]}" alt="{e(img['hero'][3])}" width="1800" height="809" style="width:100%;height:100%;object-fit:cover" /></div>
+body = f'''<article data-lswc>
+<section data-hero data-screen-label="Hero" style="color:#F2F1EA;position:relative;min-height:min(80svh,700px);display:flex;align-items:flex-end;overflow:hidden;isolation:isolate;background:#0B0F0B">
+  <div data-hero-media style="position:absolute;inset:0;z-index:-2"><img fetchpriority="high" decoding="async" src="{IMG}{img['hero'][0]}" alt="{e(img['hero'][3])}" width="1800" height="809" style="width:100%;height:100%;object-fit:cover" /></div>
   <div style="position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(11,15,11,.78) 0%,rgba(11,15,11,.5) 40%,rgba(11,15,11,.93) 100%)"></div>
   <div style="max-width:1500px;margin:0 auto;width:100%;padding:clamp(130px,18vh,220px) clamp(18px,4vw,56px) clamp(40px,5vw,70px);display:flex;flex-direction:column;gap:clamp(18px,2.4vw,28px)">
-    <nav aria-label="Breadcrumb" style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#B4B7AC"><a href="{BASE}/" style="color:#B4B7AC">Home</a> <span style="color:#9BB222">/</span> <a href="{BASE}/blog/" style="color:#B4B7AC">Blog</a> <span style="color:#9BB222">/</span> Winter care</nav>
-    <p style="display:flex;align-items:center;gap:14px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#C6DE4E"><span style="display:inline-block;width:38px;height:1px;background:#9BB222"></span>Maintenance · <time datetime="{DATE}">13 November 2026</time> · 5 min read</p>
-    <h1 style="font-family:var(--d);font-weight:300;font-size:clamp(36px,5.6vw,88px);line-height:1.02;letter-spacing:-.02em;max-width:20ch;text-wrap:balance">{TITLE}</h1>
-    <p style="font-size:clamp(17px,1.35vw,21px);color:#DDDED7;max-width:60ch;text-wrap:pretty">Seasonal guidance from the Life on Walls maintenance team on planting, irrigation, frost protection, light and humidity.</p>
+    <nav data-fade aria-label="Breadcrumb" style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#B4B7AC"><a href="{BASE}/" style="color:#B4B7AC">Home</a> <span style="color:#9BB222">/</span> <a href="{BASE}/blog/" style="color:#B4B7AC">Blog</a> <span style="color:#9BB222">/</span> Winter care</nav>
+    <p data-fade style="display:flex;align-items:center;gap:14px;font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#C6DE4E"><span style="display:inline-block;width:38px;height:1px;background:#9BB222"></span>Maintenance · <time datetime="{DATE}">13 November 2026</time> · 5 min read</p>
+    <h1 data-split style="font-family:var(--d);font-weight:300;font-size:clamp(36px,5.6vw,88px);line-height:1.02;letter-spacing:-.02em;max-width:20ch;text-wrap:balance">{TITLE}</h1>
+    <p data-fade style="font-size:clamp(17px,1.35vw,21px);color:#DDDED7;max-width:60ch;text-wrap:pretty">Seasonal guidance from the Life on Walls maintenance team on planting, irrigation, frost protection, light and humidity.</p>
   </div>
 </section>
 
 <section id="summary" data-screen-label="Summary" style="{SEC}">
   <div style="{WRAP};{TWO}">
     <div>
-      <p style="{EYEBROW}">In short</p>
-      <p style="{P};font-size:clamp(18px,1.3vw,20px);color:#12160F">To care for a living wall in winter, check it before reacting. Outdoors, reduce irrigation as growth slows, protect exposed pipework and timers from frost, and clear drainage. Indoors, check that lighting still covers the wall, watch humidity near heating vents, and adjust watering and feeding to how actively the plants are growing.</p>
+      <p data-fade style="{EYEBROW}">In short</p>
+      <p data-fade style="{P};font-size:clamp(18px,1.3vw,20px);color:#12160F">To care for a living wall in winter, check it before reacting. Outdoors, reduce irrigation as growth slows, protect exposed pipework and timers from frost, and clear drainage. Indoors, check that lighting still covers the wall, watch humidity near heating vents, and adjust watering and feeding to how actively the plants are growing.</p>
       {p('Winter brings changing conditions that affect how living walls grow and the care they need. Outdoors, cooler temperatures can slow plant growth and reduce water demand, while frost may pose a risk to exposed irrigation systems. Indoors, shorter daylight hours and dry air from heating can affect plant health, even when temperatures remain comfortable.')}
       {p('Whether indoors or outdoors, effective winter maintenance starts with understanding the conditions of your living wall. Regularly checking foliage, moisture levels in the growing medium, and irrigation and drainage systems can help identify potential issues early. For outdoor walls, pay particular attention to frost and exposure, while indoor installations may require adjustments to lighting and airflow. By observing how your living wall responds to seasonal changes, you can make small, targeted adjustments that help keep it healthy throughout winter.')}
     </div>
-    <nav aria-label="On this page" style="background:#EDF1E3;border:1px solid rgba(63,78,10,.16);padding:clamp(24px,3vw,40px)">
-      <p style="{EYEBROW}">On this page</p>
+    <nav data-fade aria-label="On this page" style="background:#EDF1E3;border:1px solid rgba(63,78,10,.16);padding:clamp(24px,3vw,40px)">
+      <p data-fade style="{EYEBROW}">On this page</p>
       <ol style="list-style:none;padding:0;display:grid;gap:12px">{''.join(f'<li><a href="#{a}" style="{LINK};font-size:16px">{t}</a></li>' for a, t in toc)}</ol>
       <p style="font-size:14px;color:#5A6055;margin-top:22px">By the Life on Walls maintenance team, who care for indoor and outdoor living walls across London and the UK.</p>
     </nav>
@@ -141,8 +144,8 @@ body = f'''<article>
 
 <section id="outdoor" data-screen-label="Outdoor" style="{ALT}{SEC}">
   <div style="{WRAP}">
-    <p style="{EYEBROW}">01 — Outdoor</p>
-    <h2 style="{H2}">Outdoor living walls</h2>
+    <p data-fade style="{EYEBROW}">01 — Outdoor</p>
+    <h2 data-split style="{H2}">Outdoor living walls</h2>
     <div style="{TWO}">
       <div>
         {h3('Choose plants for the wall’s microclimate').replace('margin:clamp(30px,4vw,50px) 0 16px', 'margin:0 0 16px')}
@@ -173,8 +176,8 @@ body = f'''<article>
 
 <section id="indoor" data-screen-label="Indoor" style="{SEC}">
   <div style="{WRAP}">
-    <p style="{EYEBROW}">02 — Indoor</p>
-    <h2 style="{H2}">Indoor living walls</h2>
+    <p data-fade style="{EYEBROW}">02 — Indoor</p>
+    <h2 data-split style="{H2}">Indoor living walls</h2>
     <div style="{TWO}">
       <div>
         {h3('Check light and humidity when the heating comes on').replace('margin:clamp(30px,4vw,50px) 0 16px', 'margin:0 0 16px')}
@@ -194,33 +197,144 @@ body = f'''<article>
 
 <section id="checklist" data-screen-label="Checklist" style="border-top:1px solid rgba(63,78,10,.16);background:#0B0F0B;color:#F2F1EA;{SEC}">
   <div style="{WRAP}">
-    <p style="font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#C6DE4E;margin-bottom:18px">03 — Checklist</p>
-    <h2 style="{H2};color:#F2F1EA">Winter living wall checklist</h2>
-    <ol style="list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(14px,2vw,24px) clamp(24px,3vw,44px)">
+    <p data-fade style="font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:#C6DE4E;margin-bottom:18px">03 — Checklist</p>
+    <h2 data-split style="{H2};color:#F2F1EA">Winter living wall checklist</h2>
+    <ol data-stagger style="list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(14px,2vw,24px) clamp(24px,3vw,44px)">
 {''.join(f'      <li style="border-top:1px solid #9BB222;padding-top:14px;display:grid;gap:6px"><span style="font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#C6DE4E">{n:02d} · {w}</span><span style="color:#DDDED7">{t}</span></li>{chr(10)}' for n, (w, t) in enumerate(checklist, 1))}    </ol>
   </div>
 </section>
 
 <section id="faq" data-screen-label="FAQ" style="{ALT}{SEC}">
   <div style="{WRAP}">
-    <p style="{EYEBROW}">04 — FAQ</p>
-    <h2 style="{H2}">Winter living wall care: common questions</h2>
-    <div style="border-top:1px solid rgba(63,78,10,.22)">
-{''.join(f'      <details style="border-bottom:1px solid rgba(63,78,10,.22);padding:20px 0"><summary style="list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;align-items:center"><h3 style="font-family:var(--d);font-weight:400;font-size:clamp(20px,1.8vw,25px);line-height:1.25;color:#12160F;margin:0">{e(q)}</h3><span class="lswc-plus" aria-hidden="true" style="font-size:26px;color:#3F4E0A;transition:transform .2s ease;flex:0 0 auto">+</span></summary><p style="{P};margin:14px 0 0">{e(a)}</p></details>{chr(10)}' for q, a in faqs)}    </div>
-    <p style="font-size:15px;color:#5A6055;margin-top:24px">More answers on load, irrigation and plant selection are in our <a href="{BASE}/living-wall-faqs/" style="{LINK}">living wall FAQ</a>.</p>
+    <p data-fade style="{EYEBROW}">04 — FAQ</p>
+    <h2 data-split style="{H2}">Winter living wall care: common questions</h2>
+    <div data-stagger style="border-top:1px solid rgba(63,78,10,.22)">
+{''.join(f'      <details style="border-bottom:1px solid rgba(63,78,10,.22);padding:20px 0"><summary style="list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:20px;align-items:center"><h3 style="font-family:var(--d);font-weight:400;font-size:clamp(20px,1.8vw,25px);line-height:1.25;color:#12160F;margin:0">{e(q)}</h3><span class="lswc-plus" aria-hidden="true" style="font-size:26px;color:#3F4E0A;transition:transform .2s ease;flex:0 0 auto">+</span></summary><p style="{P_FAQ}">{e(a)}</p></details>{chr(10)}' for q, a in faqs)}    </div>
+    <p data-fade style="font-size:15px;color:#5A6055;margin-top:24px">More answers on load, irrigation and plant selection are in our <a href="{BASE}/living-wall-faqs/" style="{LINK}">living wall FAQ</a>.</p>
   </div>
 </section>
 
 <section data-screen-label="CTA" style="border-top:1px solid rgba(63,78,10,.16);{SEC}">
   <div style="{WRAP};display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(28px,4vw,70px);align-items:end">
-    <div><p style="{EYEBROW}">— Next step</p><h2 style="{H2};margin-bottom:0">Need help preparing your living wall for winter?</h2></div>
-    <div>
+    <div><p data-fade style="{EYEBROW}">— Next step</p><h2 data-split style="{H2_CTA}">Need help preparing your living wall for winter?</h2></div>
+    <div data-fade>
       <p style="color:#5A6055;max-width:46ch;margin-bottom:24px;text-wrap:pretty">Get in touch with Life on Walls™ to discuss seasonal maintenance, irrigation, or planting suited to your site. We also maintain living walls installed by other companies.</p>
       <p style="display:flex;flex-wrap:wrap;gap:12px"><a class="lh-lswc-1" href="{BASE}/contact-us/" style="{BTN1}">Book a consultation</a><a class="lh-lswc-2" href="{BASE}/living-wall-maintenance/" style="{BTN2}">Maintenance services</a></p>
     </div>
   </div>
 </section>
 </article>'''
+
+# Motion: same GSAP 3.12.5 + ScrollTrigger build as the /blog/ index. Content is
+# only hidden once GSAP has loaded, nothing moves under prefers-reduced-motion,
+# and a watchdog reveals everything if the animation loop never starts.
+MOTION = '''<style>
+.low-root [data-lswc] .wordwrap{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.12em;margin-bottom:-.12em}
+.low-root [data-lswc] .word{display:inline-block;will-change:transform}
+.low-root [data-lswc] [data-reveal]{overflow:hidden}
+.lswc-progress{position:fixed;top:0;left:0;right:0;height:3px;background:#9BB222;transform-origin:0 50%;transform:scaleX(0);z-index:2147483001;pointer-events:none}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var art = document.querySelector('[data-lswc]');
+  if (!art || art.dataset.motion) return;
+  art.dataset.motion = '1';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mob = window.matchMedia('(max-width: 999px)').matches;
+
+  /* reading progress */
+  var bar = document.createElement('div');
+  bar.className = 'lswc-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+  var ticking = false;
+  function prog(){
+    ticking = false;
+    var r = art.getBoundingClientRect(), total = art.offsetHeight - window.innerHeight;
+    var p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0;
+    bar.style.transform = 'scaleX(' + p + ')';
+  }
+  function onScroll(){ if (!ticking) { ticking = true; requestAnimationFrame(prog); } }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  prog();
+
+  function boot(){
+    var gsap = window.gsap, ST = window.ScrollTrigger;
+    if (!gsap || !ST || reduced) return;
+    gsap.registerPlugin(ST);
+
+    art.querySelectorAll('[data-split]').forEach(function(el){
+      if (mob && el.tagName === 'H1') return;
+      var text = el.textContent.trim();
+      el.setAttribute('aria-label', text);
+      el.innerHTML = text.split(/\\s+/).map(function(w){
+        return '<span class="wordwrap" aria-hidden="true"><span class="word">' + w + '</span></span>';
+      }).join(' ');
+    });
+
+    /* hero */
+    var hero = art.querySelector('[data-hero]');
+    var media = hero && hero.querySelector('[data-hero-media]');
+    var heroImg = media && media.querySelector('img');
+    var tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    if (heroImg) tl.fromTo(heroImg, { scale: 1.12 }, { scale: 1, duration: 2.4, ease: 'power2.out' }, 0);
+    if (hero) {
+      var hw = hero.querySelectorAll('.word');
+      if (hw.length) tl.from(hw, { yPercent: 118, duration: 1.25, stagger: 0.045 }, 0.15);
+      tl.from(hero.querySelectorAll('[data-fade]'), { opacity: 0, y: 26, duration: 1, stagger: 0.08 }, 0.35);
+    }
+    if (media) gsap.to(media, { yPercent: 14, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+
+    /* headings */
+    art.querySelectorAll('[data-split]').forEach(function(el){
+      if (hero && hero.contains(el)) return;
+      gsap.from(el.querySelectorAll('.word'), { yPercent: 115, duration: 1.05, ease: 'expo.out', stagger: 0.035, scrollTrigger: { trigger: el, start: 'top 85%' } });
+    });
+
+    /* text */
+    art.querySelectorAll('[data-fade]').forEach(function(el){
+      if (hero && hero.contains(el)) return;
+      gsap.from(el, { opacity: 0, y: 28, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+    });
+
+    /* photographs: wipe open with a slow settle */
+    art.querySelectorAll('[data-reveal]').forEach(function(fig){
+      var img = fig.querySelector('img'), cap = fig.querySelector('figcaption');
+      var t = gsap.timeline({ scrollTrigger: { trigger: fig, start: 'top 85%' } });
+      if (img) t.fromTo(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.14 }, { clipPath: 'inset(0 0 0% 0)', scale: 1, duration: 1.4, ease: 'expo.out', clearProps: 'clipPath' });
+      if (cap) t.from(cap, { opacity: 0, y: 12, duration: 0.8, ease: 'power3.out' }, 0.5);
+    });
+
+    /* lists, checklist, FAQ */
+    art.querySelectorAll('[data-stagger]').forEach(function(list){
+      gsap.from(list.children, { opacity: 0, y: 22, duration: 0.8, ease: 'power3.out', stagger: 0.07, scrollTrigger: { trigger: list, start: 'top 85%' } });
+    });
+
+    art.querySelectorAll('details').forEach(function(d){ d.addEventListener('toggle', function(){ ST.refresh(); }); });
+
+    /* watchdog: never leave content hidden */
+    setTimeout(function(){
+      if (gsap.ticker.frame > 0) return;
+      gsap.globalTimeline.getChildren().forEach(function(t){ t.kill(); });
+      ST.getAll().forEach(function(t){ t.kill(); });
+      gsap.set(art.querySelectorAll('[data-fade],[data-stagger] > *,[data-reveal] img,[data-reveal] figcaption,.word,[data-hero-media],[data-hero-media] img'), { clearProps: 'opacity,transform,clipPath' });
+    }, 1100);
+
+    window.addEventListener('load', function(){ ST.refresh(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ ST.refresh(); });
+  }
+
+  function waitLibs(n){
+    if (window.gsap && window.ScrollTrigger) return boot();
+    if (n > 80) return;
+    setTimeout(function(){ waitLibs(n + 1); }, 100);
+  }
+  waitLibs(0);
+})();
+</script>'''
 
 ORG = {'@id': BASE + '/#organization'}
 graph = [
@@ -246,5 +360,6 @@ meta = {'slug': SLUG, 'title': TITLE, 'seo_title': 'Living Wall Winter Care: Ind
         'og_image': 'https://lifeonwalls.co.uk/wp-content/uploads/2026/11/' + img['hero'][0]}
 open(f'{OUT}/body.html', 'w').write(body)
 open(f'{OUT}/head.html', 'w').write(head)
+open(f'{OUT}/motion.html', 'w').write(MOTION)
 open(f'{OUT}/meta.json', 'w').write(json.dumps(meta, indent=2, ensure_ascii=False))
 print(len(head), len(body), len(meta['seo_title']), len(DESC))
