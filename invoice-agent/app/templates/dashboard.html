@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% import "_chart.html" as ch %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% set h = s.headline %}{% set cur = s.base_currency %}
+<div class="toolbar">
+  <h1 style="margin:0;flex:1">Payables today <span class="muted" style="font-size:14px">· {{ s.as_of|date }}</span></h1>
+  <button class="btn secondary" onclick="busy(this, async () => { const r = await api('/api/ingest'); toast(`${r.new_emails} new email(s), ${r.invoices_found} invoice(s) found`); setTimeout(() => location.reload(), 1200); })">Check mailbox now</button>
+  <button class="btn secondary" onclick="busy(this, async () => { const r = await api('/api/reports', {notify: false}); location.href = '/reports/' + r.id; })">Build report</button>
+  <button class="btn" onclick="if (confirm('Build the report and send it to the Telegram report recipients?')) busy(this, async () => { await api('/api/reports', {notify: true}); toast('Report sent to Telegram'); })">Build &amp; send to board</button>
+</div>
+
+<section class="tiles">
+  <div class="tile overdue"><div class="label">Overdue now</div><div class="value">{{ h.overdue|money(cur) }}</div><div class="note">{{ s.counts.get('overdue', 0) }} invoices</div></div>
+  <div class="tile"><div class="label">Due next 7 days</div><div class="value">{{ h.within_7|money(cur) }}</div><div class="note">{{ h.cash_7_incl_overdue|money(cur) }} incl. overdue</div></div>
+  <div class="tile"><div class="label">Due next 14 days</div><div class="value">{{ h.within_14|money(cur) }}</div><div class="note">cumulative</div></div>
+  <div class="tile"><div class="label">Due next 30 days</div><div class="value">{{ h.within_30|money(cur) }}</div><div class="note">cumulative</div></div>
+  <div class="tile"><div class="label">Total outstanding</div><div class="value">{{ h.outstanding|money(cur) }}</div><div class="note">{{ s.open_count }} invoices</div></div>
+</section>
+
+{% if s.needs_review or s.extraction_errors %}
+<div class="notice">
+  {% if s.needs_review %}<a href="/invoices?review=1">{{ s.needs_review|length }} invoice(s) need a check</a>.{% endif %}
+  {% if s.extraction_errors %}<a href="/emails?status=error">{{ s.extraction_errors|length }} email(s) failed extraction</a>.{% endif %}
+  Every correction you make teaches the agent.
+</div>
+{% endif %}
+
+<div class="grid2">
+  <div class="card"><h2>{{ cur }} due by week</h2>{{ ch.bars(s.chart, max_val, cur) }}</div>
+  <div class="card"><h2>Largest balances</h2>
+    <table><tr><th>Supplier</th><th class="num">Owed</th><th class="num">Next due</th></tr>
+    {% for sup in s.suppliers %}<tr><td><a href="/invoices?q={{ sup.supplier|urlencode }}">{{ sup.supplier }}</a> <span class="muted">({{ sup.count }})</span></td>
+      <td class="num">{{ sup.amount|money(sup.currency) }}</td><td class="num">{{ sup.next_due|date }}</td></tr>
+    {% else %}<tr><td colspan="3" class="muted">No open invoices yet. Click “Check mailbox now”.</td></tr>{% endfor %}</table>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card"><h2>Due in the next 14 days</h2>
+    <table><tr><th>Due</th><th>Supplier</th><th>Invoice</th><th class="num">Amount</th></tr>
+    {% for i in s.detail if i.days_to_due <= 14 %}
+      <tr class="{{ 'overdue' if i.bucket == 'overdue' }}"><td>{{ i.due_date|date }}</td><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">Nothing due.</td></tr>{% endfor %}</table>
+    <p><a href="/invoices">All invoices →</a></p>
+  </div>
+  <div class="card"><h2>Recent activity</h2>
+    {% if latest %}<p>Latest report: <a href="/reports/{{ latest.id }}">{{ latest.as_of|date }}</a></p>{% endif %}
+    <table><tr><th>Job</th><th>Started</th><th>Result</th></tr>
+    {% for r in runs %}<tr><td>{{ r.kind }}</td><td>{{ r.started_at[:16].replace('T', ' ') }}</td>
+      <td>{% if r.ok %}<span class="pill processed">ok</span>{% elif r.ok == 0 %}<span class="pill error" title="{{ r.summary }}">failed</span>{% else %}<span class="pill">running</span>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="3" class="muted">No runs yet.</td></tr>{% endfor %}</table>
+  </div>
+</div>
+{% endblock %}

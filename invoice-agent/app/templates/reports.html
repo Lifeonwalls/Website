@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1 style="margin:0;flex:1">Board reports</h1>
+  <button class="btn" onclick="busy(this, async () => { const r = await api('/api/reports', {notify: false}); location.href = '/reports/' + r.id; })">Build report now</button>
+</div>
+<div class="card">
+<table>
+  <tr><th>As of</th><th>Created</th><th>Playbook</th><th>Open</th><th>PDF</th><th>Board link (read-only)</th></tr>
+  {% for r in rows %}
+  <tr><td>{{ r.as_of|date }}</td><td>{{ r.created_at[:16].replace('T', ' ') }}</td><td>v{{ r.playbook_version }}</td>
+    <td><a href="/reports/{{ r.id }}" target="_blank">View</a></td>
+    <td>{% if r.pdf_path %}<a href="/reports/{{ r.id }}/pdf">PDF</a>{% else %}<span class="muted">–</span>{% endif %}</td>
+    <td>{% if settings.public_share_links %}<button class="btn secondary" onclick="navigator.clipboard.writeText(location.origin + '/r/{{ r.share_token }}'); toast('Link copied')">Copy link</button>{% else %}<span class="muted">disabled</span>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="6" class="muted">No reports yet.</td></tr>{% endfor %}
+</table>
+<p class="muted">Reports are built automatically on schedule ({{ settings.report_cron }}, {{ settings.timezone }}) and sent to Telegram. Anyone with a board link can view that report without signing in.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% macro bars(chart, max_val, cur) %}
+    {% set W = 560 %}{% set H = 210 %}{% set top = 22 %}{% set base_y = 180 %}{% set n = chart|length %}{% set slot = W / n %}{% set bw = slot - 14 %}
+    {% set peak = chart|map(attribute='value')|max %}
+    <svg class="chart" viewBox="0 0 {{ W }} {{ H }}" width="100%" role="img" aria-label="Amount due per week, overdue first">
+      <line class="axis" x1="0" y1="{{ base_y }}" x2="{{ W }}" y2="{{ base_y }}"/>
+      {% for b in chart %}
+        {% set bh = (b.value / max_val) * (base_y - top) %}
+        {% set x = loop.index0 * slot + 7 %}
+        <g>
+          <title>{{ b.range or b.label }}: {{ b.value|money(cur) }}</title>
+          <rect x="{{ x - 4 }}" y="{{ top }}" width="{{ bw + 8 }}" height="{{ base_y - top + 24 }}" fill="transparent"/>
+          {% if b.value > 0 %}
+          <path class="bar {{ 'overdue' if b.status == 'overdue' }}"
+                d="M{{ x }},{{ base_y }} V{{ base_y - bh + ([4, bh]|min) }} q0,-{{ [4, bh]|min }} {{ [4, bh]|min }},-{{ [4, bh]|min }} H{{ x + bw - ([4, bh]|min) }} q{{ [4, bh]|min }},0 {{ [4, bh]|min }},{{ [4, bh]|min }} V{{ base_y }} Z"/>
+          {% endif %}
+          {% if b.value > 0 and (b.status == 'overdue' or b.value == peak) %}
+          <text class="val" x="{{ x + bw / 2 }}" y="{{ base_y - bh - 6 }}" text-anchor="middle">{{ '£%.1fk'|format(b.value / 1000) if cur == 'GBP' else '%.1fk'|format(b.value / 1000) }}</text>
+          {% endif %}
+          <text x="{{ x + bw / 2 }}" y="{{ base_y + 16 }}" text-anchor="middle">{{ b.label }}</text>
+        </g>
+      {% endfor %}
+    </svg>
+{% endmacro %}

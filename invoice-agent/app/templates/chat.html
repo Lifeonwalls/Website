@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Ask the agent{% endblock %}
+{% block content %}
+<div class="toolbar"><h1 style="margin:0;flex:1">Ask the agent</h1>
+  <button class="btn secondary" onclick="api('/api/chat/reset').then(() => { log.innerHTML = ''; toast('New conversation'); })">New conversation</button></div>
+<div class="chat">
+  <div class="log" id="log">
+    <div class="msg bot">Hi! I can answer questions about invoices to pay, correct extracted data, mark invoices paid, build the board report and learn from your feedback.</div>
+  </div>
+  <div class="chips">
+    {% for q in ['What do we need to pay in the next 7 days?', 'Which invoices are overdue?', 'Show invoices that need checking', 'Build the board report', 'What have you learned so far?'] %}
+    <span class="chip" onclick="send('{{ q }}')">{{ q }}</span>{% endfor %}
+  </div>
+  <form onsubmit="event.preventDefault(); send(input.value)">
+    <textarea id="input" placeholder="e.g. Invoice 4471 from Acme is actually due on 30 Nov" onkeydown="if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); send(this.value); }"></textarea>
+    <button class="btn" id="send">Send</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script>
+const log = document.getElementById('log'), input = document.getElementById('input'), sendBtn = document.getElementById('send');
+function add(role, text) {
+  const d = document.createElement('div'); d.className = 'msg ' + role;
+  if (role === 'bot') d.innerHTML = DOMPurify.sanitize(marked.parse(text)); else d.textContent = text;
+  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+async function send(text) {
+  text = (text || '').trim(); if (!text || sendBtn.disabled) return;
+  input.value = ''; add('user', text); const wait = add('bot', '_Thinking…_'); sendBtn.disabled = true;
+  try { const r = await api('/api/chat', {message: text}); wait.innerHTML = DOMPurify.sanitize(marked.parse(r.answer)); }
+  catch (e) { wait.textContent = '⚠️ ' + e.message; }
+  finally { sendBtn.disabled = false; log.scrollTop = log.scrollHeight; input.focus(); }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Learning{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1 style="margin:0;flex:1">Self-improvement</h1>
+  <button class="btn" onclick="if (confirm('Run an improvement cycle now? It replays up to {{ settings.eval_max_cases }} test emails twice, which uses Claude API credits and takes a few minutes.')) busy(this, async () => { const r = await api('/api/improve/run'); toast(r.status + (r.version ? ' (v' + r.version + ')' : '') + (r.reason ? ': ' + r.reason : '')); setTimeout(() => location.reload(), 1500); })">Learn from feedback now</button>
+</div>
+
+<div class="tiles" style="grid-template-columns:repeat(4,1fr)">
+  <div class="tile"><div class="label">Active playbook</div><div class="value">v{{ active.version }}</div><div class="note">{{ active.created_at[:10] }}</div></div>
+  <div class="tile"><div class="label">Pending feedback</div><div class="value">{{ pending_feedback }}</div><div class="note">used at next cycle ({{ settings.improve_cron }})</div></div>
+  <div class="tile"><div class="label">Regression tests</div><div class="value">{{ n_cases }}</div><div class="note">emails with human-checked answers</div></div>
+  <div class="tile"><div class="label">Approval</div><div class="value" style="font-size:16px">{{ 'Automatic' if settings.auto_apply_improvements else 'Human' }}</div><div class="note">new versions must pass tests first</div></div>
+</div>
+
+<div class="card">
+  <h2>How it learns</h2>
+  <p style="margin:0">Corrections, confirmations and comments (web, Telegram, chat) are stored as feedback. Each corrected or confirmed email becomes a regression test.
+  The optimizer proposes a new playbook of rules; it is replayed against every test and only kept if the score does not drop and nothing that used to be right breaks.
+  You then approve it (or it is applied automatically if enabled) and invoices still needing a check are re-read with the new rules. Fields you corrected by hand are never overwritten.</p>
+</div>
+
+{% for v in (versions|selectattr('status', 'in', ['candidate', 'rejected'])|list)[:6] %}
+<div class="card">
+  <h2>v{{ v.version }} <span class="pill {{ v.status }}">{{ v.status }}</span> <span class="muted" style="text-transform:none">score {{ v.eval_score }} vs current {{ v.baseline_score }}{% if v.eval_details.regressions %} · {{ v.eval_details.regressions|length }} regression(s){% endif %}</span></h2>
+  <p>{{ v.rationale }}</p>
+  {% if v.diff %}
+    {% for section, d in v.diff.items() if d.added or d.removed %}
+      <p style="margin:6px 0 2px"><b>{{ section.replace('_', ' ') }}</b></p>
+      {% for x in d.added %}<div class="rule-add">+ {{ x.rule if x is mapping else x }}{% if x is mapping %} <span class="muted">[{{ x.supplier_match }}]</span>{% endif %}</div>{% endfor %}
+      {% for x in d.removed %}<div class="rule-del">− {{ x.rule if x is mapping else x }}</div>{% endfor %}
+    {% endfor %}
+    <div class="toolbar" style="margin-top:12px">
+      <button class="btn" onclick="busy(this, async () => { const r = await api('/api/playbooks/{{ v.version }}/approve'); toast('Activated; re-read ' + r.reprocessed + ' email(s)'); setTimeout(() => location.reload(), 1200); })">Approve &amp; activate</button>
+      <button class="btn secondary" onclick="busy(this, async () => { await api('/api/playbooks/{{ v.version }}/reject'); location.reload(); })">Reject</button>
+    </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<div class="grid2">
+  <div class="card"><h2>Active rules (v{{ active.version }})</h2>
+    <ol style="padding-left:18px;margin:0">{% for r in active.rules.extraction_rules %}<li>{{ r }}</li>{% endfor %}</ol>
+    {% if active.rules.supplier_rules %}<h2 style="margin-top:14px">Supplier rules</h2>
+      <ul style="padding-left:18px;margin:0">{% for r in active.rules.supplier_rules %}<li><b>{{ r.supplier_match }}</b>: {{ r.rule }}</li>{% endfor %}</ul>{% endif %}
+    <h2 style="margin-top:14px">Report preferences</h2>
+    <ul style="padding-left:18px;margin:0">{% for r in active.rules.report_preferences %}<li>{{ r }}</li>{% endfor %}</ul>
+    {% if active.rules.excluded_suppliers %}<p>Excluded from reports: {{ active.rules.excluded_suppliers|join(', ') }}</p>{% endif %}
+    <h2 style="margin-top:14px">History</h2>
+    <table>{% for v in versions %}<tr><td>v{{ v.version }}</td><td><span class="pill {{ v.status }}">{{ v.status }}</span></td><td>{{ v.created_at[:10] }}</td>
+      <td>{% if v.status == 'archived' %}<button class="btn secondary" onclick="if (confirm('Roll back to v{{ v.version }}?')) busy(this, async () => { await api('/api/playbooks/{{ v.version }}/approve'); location.reload(); })">Roll back</button>{% endif %}</td></tr>{% endfor %}</table>
+  </div>
+  <div class="card"><h2>Give feedback</h2>
+    <select id="fb-kind"><option value="report">About the board report</option><option value="general">General / process</option><option value="classification">Extraction quality</option></select>
+    <textarea id="fb-text" rows="3" placeholder="e.g. Please group the detailed table by category, and leave out HMRC payments" style="margin-top:6px"></textarea>
+    <button class="btn" style="margin-top:6px" onclick="busy(this, async () => { await api('/api/feedback', {kind: document.getElementById('fb-kind').value, comment: document.getElementById('fb-text').value}); location.reload(); })">Submit</button>
+    <h2 style="margin-top:16px">Recent feedback</h2>
+    <table>{% for f in feedback %}<tr><td style="white-space:nowrap">{{ f.created_at[:10] }}</td><td><span class="pill">{{ f.kind.replace('_', ' ') }}</span></td>
+      <td>{% if f.field %}<b>{{ f.field }}</b>: {{ f.old_value }} → {{ f.new_value }}{% if f.comment %}<br>{% endif %}{% endif %}{{ f.comment or '' }}<br><span class="muted">{{ f.author or f.source }}</span></td>
+      <td>{% if f.used_in_version %}<span class="pill active">v{{ f.used_in_version }}</span>{% else %}<span class="pill review">pending</span>{% endif %}</td></tr>
+    {% else %}<tr><td class="muted">No feedback yet.</td></tr>{% endfor %}</table>
+  </div>
+</div>
+{% endblock %}

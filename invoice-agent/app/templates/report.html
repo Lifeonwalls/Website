@@ -1,0 +1,174 @@
+<!doctype html>
+{% import "_chart.html" as ch %}
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payables Report {{ s.as_of }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --olive: #8F9B29; --olive-soft: #C9CF94; --graphite: #646363; --canopy: #2F3323; --mist: #F4F5EF;
+    --card: #ffffff; --rule: #DDE0D0; --muted: #8a8a88;
+    --critical: #B3261E; --critical-bg: #FBECEA; --warning: #8A5A00; --warning-bg: #FFF4DC;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--mist); color: var(--graphite); font: 500 13px/1.5 Montserrat, system-ui, sans-serif; }
+  .page { max-width: 1040px; margin: 0 auto; padding: 28px 20px 48px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+           border-bottom: 3px solid var(--olive); padding-bottom: 12px; margin-bottom: 20px; }
+  h1 { font-weight: 700; color: var(--canopy); font-size: 24px; margin: 0; }
+  h2 { font-weight: 700; color: var(--canopy); font-size: 15px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: .04em; }
+  .sub { color: var(--muted); font-size: 12px; }
+  .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 18px; }
+  .tile { background: var(--card); border-radius: 8px; padding: 14px; border-top: 3px solid var(--olive); }
+  .tile.overdue { border-top-color: var(--critical); }
+  .tile .label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .tile .value { font-size: 21px; font-weight: 700; color: var(--canopy); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .note { font-size: 11px; color: var(--muted); }
+  .card { background: var(--card); border-radius: 8px; padding: 16px 18px; margin-bottom: 16px; break-inside: avoid; }
+  .attention { background: var(--canopy); color: #fff; }
+  .attention h2 { color: #fff; }
+  .attention ul { margin: 6px 0 0; padding-left: 18px; }
+  .grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+       border-bottom: 1px solid var(--rule); padding: 6px 6px; font-weight: 600; }
+  td { border-bottom: 1px solid var(--rule); padding: 6px 6px; vertical-align: top; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tr.overdue td { background: var(--critical-bg); }
+  .pill { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 10px; white-space: nowrap; }
+  .pill.overdue { background: var(--critical-bg); color: var(--critical); }
+  .pill.review { background: var(--warning-bg); color: var(--warning); }
+  .pill.est { background: var(--mist); color: var(--graphite); }
+  .bar { fill: var(--olive); }
+  .bar.overdue { fill: var(--critical); }
+  .axis { stroke: var(--rule); stroke-width: 1; }
+  .chart text { font: 500 10.5px Montserrat, sans-serif; fill: var(--graphite); }
+  .chart .val { font-weight: 700; fill: var(--canopy); }
+  .muted { color: var(--muted); }
+  footer { margin-top: 24px; font-size: 10.5px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 8px; }
+  @media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, 1fr); } .grid2 { grid-template-columns: 1fr; }
+    .scroll { overflow-x: auto; } }
+  @media print { body { background: #fff; } .page { padding: 0; } .card, .tile { border: 1px solid var(--rule); }
+    tr { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+  <div>
+    <div class="sub">{{ s.company }} · Board report</div>
+    <h1>Payables &amp; cash requirement</h1>
+  </div>
+  <div class="sub">As of {{ s.as_of|date }} · {{ s.open_count }} open invoices · amounts in {{ s.base_currency }}</div>
+</header>
+
+{% set h = s.headline %}{% set cur = s.base_currency %}
+<section class="tiles" aria-label="Headline figures">
+  <div class="tile overdue"><div class="label">Overdue now</div><div class="value">{{ h.overdue|money(cur) }}</div>
+    <div class="note">{{ s.counts.get('overdue', 0) }} invoices</div></div>
+  <div class="tile"><div class="label">Due next 7 days</div><div class="value">{{ h.within_7|money(cur) }}</div>
+    <div class="note">{{ h.cash_7_incl_overdue|money(cur) }} incl. overdue</div></div>
+  <div class="tile"><div class="label">Due next 14 days</div><div class="value">{{ h.within_14|money(cur) }}</div>
+    <div class="note">cumulative, excl. overdue</div></div>
+  <div class="tile"><div class="label">Due next 30 days</div><div class="value">{{ h.within_30|money(cur) }}</div>
+    <div class="note">cumulative, excl. overdue</div></div>
+  <div class="tile"><div class="label">Total outstanding</div><div class="value">{{ h.outstanding|money(cur) }}</div>
+    <div class="note">{{ h.d31_plus|money(cur) }} due after 30 days</div></div>
+</section>
+
+{% if s.other_currencies %}
+<div class="card"><h2>Other currencies (not converted)</h2>
+  <table><tr><th>Currency</th><th class="num">Overdue</th><th class="num">Next 7</th><th class="num">Next 14</th><th class="num">Next 30</th><th class="num">Outstanding</th></tr>
+  {% for c, t in s.other_currencies.items() %}<tr><td>{{ c }}</td><td class="num">{{ t.get('overdue',0)|money(c) }}</td>
+    <td class="num">{{ t.get('within_7',0)|money(c) }}</td><td class="num">{{ t.get('within_14',0)|money(c) }}</td>
+    <td class="num">{{ t.get('within_30',0)|money(c) }}</td><td class="num">{{ t.get('outstanding',0)|money(c) }}</td></tr>{% endfor %}
+  </table></div>
+{% endif %}
+
+{% if c or s.needs_review or s.extraction_errors %}
+<div class="card attention">
+  <h2>Board attention</h2>
+  {% if c %}<p style="margin:0 0 4px;font-weight:600">{{ c.headline }}</p>
+  <ul>{% for b in c.bullets %}<li>{{ b }}</li>{% endfor %}</ul>{% endif %}
+  {% if s.needs_review %}<p style="margin:10px 0 0">{{ s.needs_review|length }} invoice(s) are flagged for a check before payment (marked “Check” below).</p>{% endif %}
+  {% if s.extraction_errors %}<p style="margin:6px 0 0">{{ s.extraction_errors|length }} email(s) could not be read automatically and need manual review.</p>{% endif %}
+</div>
+{% endif %}
+
+<div class="grid2">
+  <div class="card">
+    <h2>{{ cur }} due by week</h2>
+    {{ ch.bars(s.chart, max_val, cur) }}
+    <div class="sub">Weeks start today ({{ s.as_of|date }}). Hover a bar for the exact amount; full figures in the table below.</div>
+  </div>
+  <div class="card">
+    <h2>Largest balances by supplier</h2>
+    <table><tr><th>Supplier</th><th class="num">Owed</th><th class="num">Next due</th></tr>
+    {% for sup in s.suppliers %}<tr><td>{{ sup.supplier }} <span class="muted">({{ sup.count }})</span></td>
+      <td class="num">{{ sup.amount|money(sup.currency) }}</td><td class="num">{{ sup.next_due|date }}</td></tr>
+    {% else %}<tr><td colspan="3" class="muted">No open invoices.</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Invoices to be paid ({{ s.detail|length }})</h2>
+  <div class="scroll">
+  <table>
+    <tr><th>Due</th><th>Supplier</th><th>Invoice #</th><th>Invoice date</th><th>For</th><th class="num">Total</th><th class="num">Amount due</th><th></th></tr>
+    {% for i in s.detail %}
+    <tr class="{{ 'overdue' if i.bucket == 'overdue' }}">
+      <td style="white-space:nowrap">{{ i.due_date|date }}
+        {% if i.bucket == 'overdue' %}<br><span class="pill overdue">{{ -i.days_to_due }}d overdue</span>
+        {% elif i.due_date_source != 'stated' %}<br><span class="pill est">{{ 'from terms' if i.due_date_source == 'terms' else 'estimated' }}</span>{% endif %}</td>
+      <td>{{ i.supplier }}{% if i.status == 'disputed' %} <span class="pill review">Disputed</span>{% endif %}</td>
+      <td>{{ i.invoice_number }}{% if i.po_number %}<br><span class="muted">PO {{ i.po_number }}</span>{% endif %}</td>
+      <td style="white-space:nowrap">{{ i.invoice_date|date }}</td>
+      <td>{{ i.description or '' }}{% if i.category %}<br><span class="muted">{{ i.category }}</span>{% endif %}</td>
+      <td class="num">{{ i.total_amount|money(i.currency) }}</td>
+      <td class="num"><b>{{ i.amount_due|money(i.currency) }}</b></td>
+      <td>{% if i.needs_review %}<span class="pill review" title="{{ i.review_reasons|join('; ') }}">Check</span>{% endif %}</td>
+    </tr>
+    {% else %}<tr><td colspan="8" class="muted">Nothing outstanding.</td></tr>{% endfor %}
+  </table>
+  </div>
+</div>
+
+{% if s.needs_review %}
+<div class="card"><h2>Checks before payment</h2>
+  <table><tr><th>Supplier</th><th>Invoice #</th><th class="num">Amount</th><th>Why</th></tr>
+  {% for i in s.needs_review %}<tr><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td>
+    <td>{{ i.review_reasons|join('; ') }}</td></tr>{% endfor %}</table></div>
+{% endif %}
+
+<div class="grid2">
+  <div class="card"><h2>Received in the last 7 days ({{ s.new_this_week|length }})</h2>
+    <table><tr><th>Supplier</th><th>Invoice #</th><th class="num">Amount</th></tr>
+    {% for i in s.new_this_week[:15] %}<tr><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td></tr>
+    {% else %}<tr><td colspan="3" class="muted">None.</td></tr>{% endfor %}
+    {% if s.new_this_week|length > 15 %}<tr><td colspan="3" class="muted">…and {{ s.new_this_week|length - 15 }} more (all listed above if unpaid)</td></tr>{% endif %}</table></div>
+  <div class="card"><h2>Marked paid in the last 7 days ({{ s.paid_this_week|length }})</h2>
+    <table><tr><th>Supplier</th><th>Invoice #</th><th class="num">Amount</th></tr>
+    {% for i in s.paid_this_week[:15] %}<tr><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td></tr>
+    {% else %}<tr><td colspan="3" class="muted">None recorded.</td></tr>{% endfor %}
+    {% if s.paid_this_week|length > 15 %}<tr><td colspan="3" class="muted">…and {{ s.paid_this_week|length - 15 }} more</td></tr>{% endif %}</table></div>
+</div>
+
+{% if s.credits %}
+<div class="card"><h2>Unapplied credit notes ({{ s.credits_total|money(cur) }})</h2>
+  <table><tr><th>Supplier</th><th>Credit #</th><th class="num">Amount</th></tr>
+  {% for i in s.credits %}<tr><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td></tr>{% endfor %}</table></div>
+{% endif %}
+
+<footer>
+  Generated automatically from invoices received at {{ settings.imap_user }}. Figures cover invoices received by email
+  and not yet marked paid; “estimated” due dates assume {{ settings.default_payment_terms_days }}-day terms where none were stated.
+  {% if s.excluded %}{{ s.excluded|length }} invoice(s) from excluded suppliers are not shown.{% endif %}
+  Playbook v{{ s.playbook_version }}.
+</footer>
+</div>
+</body>
+</html>

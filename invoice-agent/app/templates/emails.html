@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Mailbox{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <h1 style="margin:0;flex:1">Mailbox processing <span class="muted" style="font-size:14px">· {{ settings.imap_user }}</span></h1>
+  <select name="status" onchange="this.form.submit()">
+    <option value="">All</option>
+    {% for v in ['processed', 'not_invoice', 'skipped', 'error', 'new'] %}<option value="{{ v }}" {{ 'selected' if v == status }}>{{ v.replace('_', ' ') }}</option>{% endfor %}
+  </select>
+</form>
+<div class="card scroll">
+<table>
+  <tr><th>#</th><th>Received</th><th>From</th><th>Subject</th><th>Classified as</th><th>Status</th><th class="num">Invoices</th><th></th></tr>
+  {% for e in rows %}
+  <tr>
+    <td class="muted">{{ e.id }}</td>
+    <td style="white-space:nowrap">{{ e.received_at[:16].replace('T', ' ') }}</td>
+    <td>{{ e.from_addr }}</td><td>{{ e.subject }}</td>
+    <td>{{ (e.classification or '').replace('_', ' ') }}</td>
+    <td><span class="pill {{ e.status }}" title="{{ e.error or '' }}">{{ e.status.replace('_', ' ') }}</span></td>
+    <td class="num">{% if e.n_invoices %}<a href="/invoices?status=any&q=">{{ e.n_invoices }}</a>{% else %}0{% endif %}</td>
+    <td><button class="btn secondary" onclick="busy(this, async () => { const r = await api('/api/emails/{{ e.id }}/reprocess'); toast(r.error ? 'Failed: ' + r.error : `${r.classification}: ${(r.invoice_ids||[]).length} invoice(s)`); setTimeout(() => location.reload(), 1500); })">Re-read</button></td>
+  </tr>
+  {% else %}<tr><td colspan="8" class="muted">No emails yet.</td></tr>{% endfor %}
+</table>
+<p class="muted">“Skipped” emails had no attachment and no invoice-related words, so they were not sent to Claude. Use “Re-read” to force extraction. The mailbox is opened read-only: nothing is marked as read, moved or deleted.</p>
+</div>
+{% endblock %}

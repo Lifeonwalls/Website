@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Invoices{% endblock %}
+{% block content %}
+<form class="toolbar" method="get">
+  <h1 style="margin:0;flex:1">Invoices</h1>
+  <input name="q" value="{{ q }}" placeholder="Supplier, number, PO…">
+  <select name="status">
+    {% for v in ['unpaid', 'paid', 'disputed', 'ignored', 'any'] %}<option value="{{ v }}" {{ 'selected' if v == status }}>{{ v|capitalize }}</option>{% endfor %}
+  </select>
+  <label style="margin:0;display:flex;gap:4px;align-items:center"><input type="checkbox" name="review" value="1" {{ 'checked' if review == '1' }}> needs check</label>
+  <button class="btn secondary">Filter</button>
+  <button class="btn" type="button" onclick="openNew()">+ Add missed invoice</button>
+</form>
+<div class="card scroll">
+<table>
+  <tr><th>Due</th><th>Supplier</th><th>Invoice #</th><th>Inv. date</th><th>For</th><th class="num">Amount due</th><th>Status</th><th></th></tr>
+  {% set ns = namespace(total=0) %}
+  {% for i in rows %}{% if i.currency == settings.base_currency %}{% set ns.total = ns.total + (i.amount_due or 0) %}{% endif %}
+  <tr class="click {{ 'overdue' if i.status == 'unpaid' and i.due_date and i.due_date < now_iso }}" onclick="openInvoice({{ i.id }})">
+    <td style="white-space:nowrap">{{ i.due_date|date }}{% if i.due_date_source != 'stated' %}<br><span class="pill">{{ 'from terms' if i.due_date_source == 'terms' else 'estimated' }}</span>{% endif %}</td>
+    <td>{{ i.supplier }}</td><td>{{ i.invoice_number }}{% if i.doc_type == 'credit_note' %} <span class="pill">credit</span>{% endif %}</td>
+    <td style="white-space:nowrap">{{ i.invoice_date|date }}</td><td>{{ i.description or '' }}</td>
+    <td class="num"><b>{{ i.amount_due|money(i.currency) }}</b></td>
+    <td><span class="pill {{ i.status }}">{{ i.status }}</span></td>
+    <td>{% if i.needs_review %}<span class="pill review" title="{{ i.review_reasons|join('; ') }}">Check</span>{% endif %}</td>
+  </tr>
+  {% else %}<tr><td colspan="8" class="muted">No invoices match.</td></tr>{% endfor %}
+  {% if rows %}<tr><td colspan="5"><b>{{ rows|length }} invoices</b></td><td class="num"><b>{{ ns.total|money(settings.base_currency) }}</b></td><td colspan="2" class="muted">{{ settings.base_currency }} only</td></tr>{% endif %}
+</table>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg-head"><b id="dlg-title">Invoice</b><button class="btn secondary" onclick="dlg.close()">Close</button></div>
+  <div class="dlg-body">
+    <div id="dlg-reasons"></div>
+    <div class="form-grid" id="dlg-form"></div>
+    <p><label for="dlg-comment">Why are you changing it? (teaches the agent)</label>
+      <textarea id="dlg-comment" rows="2" placeholder="e.g. Acme put the due date in the footer; the 'date' at the top is the delivery date"></textarea></p>
+    <p class="muted" id="dlg-source"></p>
+  </div>
+  <div class="dlg-foot" id="dlg-foot"></div>
+</dialog>
+{% endblock %}
+{% block scripts %}
+<script>
+const FIELDS = {{ editable|tojson }};
+const ORDER = ['supplier','invoice_number','invoice_date','due_date','amount_due','total_amount','net_amount','vat_amount','currency',
+  'doc_type','payment_terms','payment_reference','po_number','bank_details','description','category','supplier_email'];
+const dlg = document.getElementById('dlg');
+let current = null;
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function fieldInput(f, v) {
+  const type = f.endsWith('_date') ? 'date' : (f.endsWith('_amount') || f === 'amount_due') ? 'number' : 'text';
+  if (f === 'doc_type') return `<select data-f="${f}"><option ${v==='invoice'?'selected':''}>invoice</option><option ${v==='credit_note'?'selected':''}>credit_note</option></select>`;
+  return `<input data-f="${f}" type="${type}" ${type==='number'?'step="0.01"':''} value="${esc(v)}">`;
+}
+function renderForm(inv) {
+  document.getElementById('dlg-form').innerHTML = ORDER.filter(f => FIELDS.includes(f)).map(f =>
+    `<div><label>${f.replace(/_/g,' ')}${(inv.locked_fields||[]).includes(f) ? ' ✓' : ''}</label>${fieldInput(f, inv[f])}</div>`).join('');
+}
+async function openInvoice(id) {
+  const inv = await api('/api/invoices/' + id, undefined, 'GET'); current = inv;
+  document.getElementById('dlg-title').textContent = `${inv.supplier} · ${inv.invoice_number}`;
+  document.getElementById('dlg-reasons').innerHTML = (inv.review_reasons||[]).length ?
+    `<div class="notice">${inv.review_reasons.map(esc).join('<br>')}</div>` : '';
+  renderForm(inv);
+  document.getElementById('dlg-comment').value = '';
+  document.getElementById('dlg-source').innerHTML = inv.email_id ?
+    `From email: “${esc(inv.email_subject)}” (${esc(inv.email_from)}) · ` + (inv.documents||[]).map(d =>
+      `<a href="/api/documents/${d.id}" target="_blank">${esc(d.filename)}</a>`).join(' · ') : 'Added manually';
+  document.getElementById('dlg-foot').innerHTML = `
+    <button class="btn secondary" onclick="setStatus('ignored')">Not a payable</button>
+    <button class="btn secondary" onclick="setStatus('disputed')">Disputed</button>
+    <button class="btn secondary" onclick="setStatus('${inv.status === 'paid' ? 'unpaid' : 'paid'}')">${inv.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button>
+    <button class="btn secondary" onclick="confirmInv(this)">Looks right ✓</button>
+    <button class="btn" onclick="save(this)">Save corrections</button>`;
+  dlg.showModal();
+}
+function changes() {
+  const out = {};
+  document.querySelectorAll('#dlg-form [data-f]').forEach(el => {
+    const f = el.dataset.f, v = el.value, old = current[f];
+    if (String(old ?? '') !== String(v) && !(old == null && v === '')) {
+      if (el.type === 'number' && old != null && Number(old) === Number(v)) return;
+      out[f] = v;
+    }
+  });
+  return out;
+}
+async function save(btn) {
+  const c = changes(); if (!Object.keys(c).length) { toast('No changes'); return; }
+  await busy(btn, async () => { await api('/api/invoices/' + current.id, {changes: c, comment: document.getElementById('dlg-comment').value || null});
+    toast('Saved – the agent will learn from this'); setTimeout(() => location.reload(), 700); });
+}
+async function setStatus(st) {
+  await api('/api/invoices/' + current.id, {changes: {status: st}, comment: document.getElementById('dlg-comment').value || null});
+  toast('Status: ' + st); setTimeout(() => location.reload(), 600);
+}
+async function confirmInv(btn) { await busy(btn, async () => { await api(`/api/invoices/${current.id}/confirm`); toast('Confirmed – saved as a test case'); setTimeout(() => location.reload(), 600); }); }
+function openNew() {
+  current = {id: null};
+  document.getElementById('dlg-title').textContent = 'Add an invoice the agent missed';
+  document.getElementById('dlg-reasons').innerHTML = '<div class="notice">Supplier, invoice number, amount due and due date are required. Add the mailbox email id if you know it so the agent can learn from that email.</div>';
+  renderForm({currency: '{{ settings.base_currency }}', doc_type: 'invoice'});
+  document.getElementById('dlg-form').insertAdjacentHTML('beforeend', '<div><label>email id (optional)</label><input id="new-email" type="number"></div>');
+  document.getElementById('dlg-source').textContent = '';
+  document.getElementById('dlg-foot').innerHTML = '<button class="btn" onclick="createInv(this)">Add invoice</button>';
+  dlg.showModal();
+}
+async function createInv(btn) {
+  const fields = {}; document.querySelectorAll('#dlg-form [data-f]').forEach(el => { if (el.value) fields[el.dataset.f] = el.value; });
+  const email = document.getElementById('new-email').value;
+  await busy(btn, async () => { await api('/api/invoices', {fields, email_id: email ? Number(email) : null,
+    comment: document.getElementById('dlg-comment').value || null}); toast('Invoice added'); setTimeout(() => location.reload(), 600); });
+}
+</script>
+{% endblock %}
