@@ -65,5 +65,11 @@ Do all of these without being asked. If a post is published without one, fix it.
   `ewpa/search-replace` on the snippet's post ID. Find the blog snippet ID from the
   `[wpcode id="…"]` shortcode in page 4634.
 - Purge cache with `ewpa/clear-cache` (page) or `hostinger-ai/litespeed-cache-flush` (site).
+- Fallback when the Hostinger "Wordpress" connector is down: the WordPress.com connector
+  reaches this site through Jetpack (site ID 245893262). It can upload media from a URL and
+  create/update pages (full content in a `<!-- wp:html -->` block; scripts and styles survive),
+  but it cannot write Yoast fields or edit WPCode snippets. Finish those with the Hostinger
+  connector or in wp-admin; until then Yoast uses the default title and the first image in
+  the content (the logo) as the social image.
 - Section build scripts live next to their assets, e.g.
   `blog/2026-11-living-wall-winter-care/build.py`; copy one as the starting point for a new post.
