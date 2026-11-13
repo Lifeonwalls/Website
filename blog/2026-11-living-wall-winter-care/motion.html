@@ -1,0 +1,107 @@
+<style>
+.low-root [data-lswc] .wordwrap{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.12em;margin-bottom:-.12em}
+.low-root [data-lswc] .word{display:inline-block;will-change:transform}
+.low-root [data-lswc] [data-reveal]{overflow:hidden}
+.lswc-progress{position:fixed;top:0;left:0;right:0;height:3px;background:#9BB222;transform-origin:0 50%;transform:scaleX(0);z-index:2147483001;pointer-events:none}
+</style>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var art = document.querySelector('[data-lswc]');
+  if (!art || art.dataset.motion) return;
+  art.dataset.motion = '1';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mob = window.matchMedia('(max-width: 999px)').matches;
+
+  /* reading progress */
+  var bar = document.createElement('div');
+  bar.className = 'lswc-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(bar);
+  var ticking = false;
+  function prog(){
+    ticking = false;
+    var r = art.getBoundingClientRect(), total = art.offsetHeight - window.innerHeight;
+    var p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0;
+    bar.style.transform = 'scaleX(' + p + ')';
+  }
+  function onScroll(){ if (!ticking) { ticking = true; requestAnimationFrame(prog); } }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  prog();
+
+  function boot(){
+    var gsap = window.gsap, ST = window.ScrollTrigger;
+    if (!gsap || !ST || reduced) return;
+    gsap.registerPlugin(ST);
+
+    art.querySelectorAll('[data-split]').forEach(function(el){
+      if (mob && el.tagName === 'H1') return;
+      var text = el.textContent.trim();
+      el.setAttribute('aria-label', text);
+      el.innerHTML = text.split(/\s+/).map(function(w){
+        return '<span class="wordwrap" aria-hidden="true"><span class="word">' + w + '</span></span>';
+      }).join(' ');
+    });
+
+    /* hero */
+    var hero = art.querySelector('[data-hero]');
+    var media = hero && hero.querySelector('[data-hero-media]');
+    var heroImg = media && media.querySelector('img');
+    var tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
+    if (heroImg) tl.fromTo(heroImg, { scale: 1.12 }, { scale: 1, duration: 2.4, ease: 'power2.out' }, 0);
+    if (hero) {
+      var hw = hero.querySelectorAll('.word');
+      if (hw.length) tl.from(hw, { yPercent: 118, duration: 1.25, stagger: 0.045 }, 0.15);
+      tl.from(hero.querySelectorAll('[data-fade]'), { opacity: 0, y: 26, duration: 1, stagger: 0.08 }, 0.35);
+    }
+    if (media) gsap.to(media, { yPercent: 14, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+
+    /* headings */
+    art.querySelectorAll('[data-split]').forEach(function(el){
+      if (hero && hero.contains(el)) return;
+      gsap.from(el.querySelectorAll('.word'), { yPercent: 115, duration: 1.05, ease: 'expo.out', stagger: 0.035, scrollTrigger: { trigger: el, start: 'top 85%' } });
+    });
+
+    /* text */
+    art.querySelectorAll('[data-fade]').forEach(function(el){
+      if (hero && hero.contains(el)) return;
+      gsap.from(el, { opacity: 0, y: 28, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
+    });
+
+    /* photographs: wipe open with a slow settle */
+    art.querySelectorAll('[data-reveal]').forEach(function(fig){
+      var img = fig.querySelector('img'), cap = fig.querySelector('figcaption');
+      var t = gsap.timeline({ scrollTrigger: { trigger: fig, start: 'top 85%' } });
+      if (img) t.fromTo(img, { clipPath: 'inset(0 0 100% 0)', scale: 1.14 }, { clipPath: 'inset(0 0 0% 0)', scale: 1, duration: 1.4, ease: 'expo.out', clearProps: 'clipPath' });
+      if (cap) t.from(cap, { opacity: 0, y: 12, duration: 0.8, ease: 'power3.out' }, 0.5);
+    });
+
+    /* lists, checklist, FAQ */
+    art.querySelectorAll('[data-stagger]').forEach(function(list){
+      gsap.from(list.children, { opacity: 0, y: 22, duration: 0.8, ease: 'power3.out', stagger: 0.07, scrollTrigger: { trigger: list, start: 'top 85%' } });
+    });
+
+    art.querySelectorAll('details').forEach(function(d){ d.addEventListener('toggle', function(){ ST.refresh(); }); });
+
+    /* watchdog: never leave content hidden */
+    setTimeout(function(){
+      if (gsap.ticker.frame > 0) return;
+      gsap.globalTimeline.getChildren().forEach(function(t){ t.kill(); });
+      ST.getAll().forEach(function(t){ t.kill(); });
+      gsap.set(art.querySelectorAll('[data-fade],[data-stagger] > *,[data-reveal] img,[data-reveal] figcaption,.word,[data-hero-media],[data-hero-media] img'), { clearProps: 'opacity,transform,clipPath' });
+    }, 1100);
+
+    window.addEventListener('load', function(){ ST.refresh(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ ST.refresh(); });
+  }
+
+  function waitLibs(n){
+    if (window.gsap && window.ScrollTrigger) return boot();
+    if (n > 80) return;
+    setTimeout(function(){ waitLibs(n + 1); }, 100);
+  }
+  waitLibs(0);
+})();
+</script>
