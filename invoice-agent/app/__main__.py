@@ -6,6 +6,7 @@
   improve          run one self-improvement cycle
   import-eml PATH  import .eml file(s) and extract them (testing / back-fill)
   ask "question"   one-off question to the agent
+  check            test API key, mailbox, Telegram and web settings (changes nothing)
 """
 from __future__ import annotations
 
@@ -50,6 +51,9 @@ def main() -> None:
             for f in ([Path(p)] if Path(p).is_file() else sorted(Path(p).glob("*.eml"))):
                 eid = import_eml(f)
                 print(f, "->", process_email(eid) if eid else "already imported")
+    elif cmd == "check":
+        from .check import run
+        sys.exit(run())
     elif cmd == "ask":
         from .agent import ask
         print(asyncio.run(ask("cli", " ".join(args[1:]), source="web", author="cli")))

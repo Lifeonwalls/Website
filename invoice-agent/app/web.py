@@ -27,6 +27,10 @@ BASE = Path(__file__).parent
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    s = get_settings()
+    if len(s.session_secret) < 32 or not s.web_password:
+        raise RuntimeError("SESSION_SECRET (32+ chars) and WEB_PASSWORD must be set - run ./setup.sh "
+                           "or `python -m app check` to see what is missing")
     db.init_db()
     playbook.get_active()
     scheduler.start()

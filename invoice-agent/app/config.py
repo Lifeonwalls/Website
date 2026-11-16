@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     # --- Web UI ----------------------------------------------------------------
     web_username: str = "admin"
     web_password: str = ""  # required to log in; empty disables login (refuses all)
-    session_secret: str = Field(default="change-me", min_length=8)
+    session_secret: str = ""  # validated by `python -m app check`; web.py refuses to start without it
     public_share_links: bool = True  # /r/<token> read-only report links for the board
 
     # --- Telegram --------------------------------------------------------------

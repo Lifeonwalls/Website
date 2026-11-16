@@ -13,7 +13,7 @@ def isolated(tmp_path, monkeypatch):
     monkeypatch.setenv("SCHEDULER_ENABLED", "false")
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "")
     monkeypatch.setenv("WEB_PASSWORD", "pw")
-    monkeypatch.setenv("SESSION_SECRET", "test-secret-123")
+    monkeypatch.setenv("SESSION_SECRET", "test-secret-0123456789-0123456789-abcdef")
     monkeypatch.setenv("COMMENTARY_ENABLED", "false")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "test")
     from app.config import get_settings

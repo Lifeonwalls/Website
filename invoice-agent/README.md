@@ -39,33 +39,44 @@ Cost: each cycle runs up to `EVAL_MAX_CASES` (default 40) emails twice through e
 
 ## Deploy on the VPS (Docker)
 
-Prerequisites: Docker and Docker Compose on the VPS, and a DNS A record (e.g. `payables.lifeonwalls.co.uk`) pointing at it.
+Before you start, have these ready:
+- an Ubuntu/Debian VPS you can SSH into, with ports 80 and 443 open;
+- a DNS A record (e.g. `payables.lifeonwalls.co.uk`) pointing at the VPS's public IP. If your domain has a wildcard record, the name may already resolve somewhere else, so check that it shows the VPS IP;
+- an Anthropic API key, the accounts@ App Password, and a Telegram bot token from @BotFather.
 
-1. Fetch the code:
-   ```bash
-   git clone https://github.com/lifeonwalls/website.git && cd website/invoice-agent
-   ```
-2. Create your config, then fill in `.env` (see the next section):
-   ```bash
-   cp .env.example .env
-   ```
-3. Build and start:
-   ```bash
-   docker compose up -d --build
-   ```
-4. Follow the logs:
-   ```bash
-   docker compose logs -f agent
-   ```
-5. Open `https://<DOMAIN>`, sign in, and click **Check mailbox now**. The first run reads the last `INITIAL_LOOKBACK_DAYS` (60) of mail.
+Get the code onto the VPS:
+```bash
+git clone -b claude/jolly-franklin-4qxo1h https://github.com/lifeonwalls/website.git
+```
+Go into the project folder:
+```bash
+cd website/invoice-agent
+```
+Run the setup:
+```bash
+./setup.sh
+```
 
-Caddy handles HTTPS certificates automatically. Data lives in `./data` (database, attachments, reports) and `./claude-sessions` (chat history), so back up both.
+`setup.sh` installs Docker if it is missing (it asks first). It asks for each value, hiding secrets as you type, and generates the web password and session secret. It builds the app and tests every connection with `python -m app check`: the API key, the mailbox login and how many emails it can see, the Telegram bot and the chat ids that have messaged it, and DNS. Then it opens the firewall and starts everything behind HTTPS. Re-run it at any time to change a value; press Enter to keep the current one.
 
-### What to fill in `.env`
-- **ANTHROPIC_API_KEY**: from console.anthropic.com.
-- **Mailbox**: if accounts@ is on Google Workspace, turn on IMAP for that user, turn on 2-step verification, and create an **App Password**. Use `imap.gmail.com`. For Microsoft 365, basic-auth IMAP is normally disabled; tell me and I'll add OAuth.
-- **Telegram**: create a bot with @BotFather and set `TELEGRAM_BOT_TOKEN`. Start the app and message the bot. It replies with your chat id. Put that id in `TELEGRAM_ALLOWED_CHAT_IDS`, then restart. For the board, add the bot to a group and put the group id (negative number) in `TELEGRAM_NOTIFY_CHAT_IDS`.
-- **WEB_PASSWORD** and **SESSION_SECRET**: long random strings.
+You can re-test the settings at any point (this changes nothing):
+```bash
+docker compose run --rm --no-deps agent python -m app check
+```
+
+Data lives in `./data` (database, attachments, reports) and `./claude-sessions` (chat history), so back up both.
+
+### Getting the mailbox password (Google Workspace)
+1. In the Google Admin console, go to **Apps → Google Workspace → Gmail → End User Access** and make sure IMAP is allowed.
+2. Sign in as **accounts@lifeonwalls.co.uk** and turn on **2-Step Verification** (myaccount.google.com/security).
+3. Still signed in as accounts@, open **myaccount.google.com/apppasswords**, create one called "Payables agent", and copy the 16 letters.
+
+If App Passwords is missing from that page, an admin has turned it off (Admin console → Security → Authentication → Less secure apps / App passwords). In that case, tell me and I'll switch the mailbox login to Google OAuth.
+
+### Setting up Telegram
+1. In Telegram, message **@BotFather**, send `/newbot`, and copy the token.
+2. During `setup.sh`, send your new bot any message. For the board, add the bot to the group and post a message there.
+3. The check prints each chat's id (groups are negative numbers). Paste them when asked.
 
 ### CLI (inside the container)
 
