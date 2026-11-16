@@ -70,3 +70,8 @@ dialog::backdrop { background: rgba(47,51,35,.45); }
 .login { max-width: 360px; margin: 12vh auto; }
 .scroll { overflow-x: auto; }
 @media (max-width: 800px) { .tiles { grid-template-columns: repeat(2, 1fr); } .grid2, .form-grid { grid-template-columns: 1fr; } }
+.btn-mini { background: #fff; color: var(--canopy); border: 1px solid var(--rule); border-radius: 5px; padding: 3px 9px; font: 600 11.5px Montserrat, sans-serif; cursor: pointer; white-space: nowrap; }
+.btn-mini:hover { border-color: var(--olive); color: var(--olive-dark); }
+.btn-mini.armed { background: var(--olive); border-color: var(--olive); color: #fff; }
+.btn-mini:disabled { opacity: .6; cursor: wait; }
+tr.paid-row td { opacity: .55; } tr.paid-row td:last-child { opacity: 1; }

@@ -203,6 +203,10 @@ class InvoiceUpdate(BaseModel):
     comment: str | None = None
 
 
+class PaidIn(BaseModel):
+    paid_date: str | None = None
+
+
 class ManualInvoice(BaseModel):
     fields: dict[str, Any]
     email_id: int | None = None
@@ -249,6 +253,29 @@ async def api_update_invoice(invoice_id: int, body: InvoiceUpdate, u: str = Depe
 async def api_confirm(invoice_id: int, u: str = Depends(user)):
     try:
         return await asyncio.to_thread(lambda: invoices.confirm_invoice(invoice_id, source="web", author=f"web:{u}"))
+    except ValueError as e:
+        raise _bad(e)
+
+
+@app.post("/api/invoices/{invoice_id}/paid")
+async def api_mark_paid(invoice_id: int, body: PaidIn, u: str = Depends(user)):
+    """Manual payment from the UI. Records who did it; paid_date defaults to today."""
+    try:
+        res = await asyncio.to_thread(lambda: invoices.mark_paid(
+            numbers=[], suppliers=[], ids=[invoice_id], paid_date=body.paid_date, source="web",
+            author=f"web:{u}", comment="Marked paid manually in the dashboard"))
+    except ValueError as e:
+        raise _bad(e)
+    if res["not_found"]:
+        raise HTTPException(404, "Invoice not found")
+    return res
+
+
+@app.post("/api/invoices/{invoice_id}/unpaid")
+async def api_mark_unpaid(invoice_id: int, u: str = Depends(user)):
+    try:
+        return await asyncio.to_thread(lambda: invoices.update_invoice(
+            invoice_id, {"status": "unpaid"}, source="web", author=f"web:{u}", comment="Payment undone in the dashboard"))
     except ValueError as e:
         raise _bad(e)
 

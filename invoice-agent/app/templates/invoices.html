@@ -13,7 +13,7 @@
 </form>
 <div class="card scroll">
 <table>
-  <tr><th>Due</th><th>Supplier</th><th>Invoice #</th><th>Inv. date</th><th>For</th><th class="num">Amount due</th><th>Status</th><th></th></tr>
+  <tr><th>Due</th><th>Supplier</th><th>Invoice #</th><th>Inv. date</th><th>For</th><th class="num">Amount due</th><th>Status</th><th></th><th></th></tr>
   {% set ns = namespace(total=0) %}
   {% for i in rows %}{% if i.currency == settings.base_currency %}{% set ns.total = ns.total + (i.amount_due or 0) %}{% endif %}
   <tr class="click {{ 'overdue' if i.status == 'unpaid' and i.due_date and i.due_date < now_iso }}" onclick="openInvoice({{ i.id }})">
@@ -23,9 +23,10 @@
     <td class="num"><b>{{ i.amount_due|money(i.currency) }}</b></td>
     <td><span class="pill {{ i.status }}">{{ i.status }}</span></td>
     <td>{% if i.needs_review %}<span class="pill review" title="{{ i.review_reasons|join('; ') }}">Check</span>{% endif %}</td>
+    <td>{% if i.status in ('unpaid', 'disputed') %}<button class="btn-mini" data-pay="{{ i.id }}">Mark paid</button>{% elif i.status == 'paid' %}<button class="btn-mini" data-unpay="{{ i.id }}">Undo paid</button>{% endif %}</td>
   </tr>
-  {% else %}<tr><td colspan="8" class="muted">No invoices match.</td></tr>{% endfor %}
-  {% if rows %}<tr><td colspan="5"><b>{{ rows|length }} invoices</b></td><td class="num"><b>{{ ns.total|money(settings.base_currency) }}</b></td><td colspan="2" class="muted">{{ settings.base_currency }} only</td></tr>{% endif %}
+  {% else %}<tr><td colspan="9" class="muted">No invoices match.</td></tr>{% endfor %}
+  {% if rows %}<tr><td colspan="5"><b>{{ rows|length }} invoices</b></td><td class="num"><b>{{ ns.total|money(settings.base_currency) }}</b></td><td colspan="3" class="muted">{{ settings.base_currency }} only</td></tr>{% endif %}
 </table>
 </div>
 
@@ -71,7 +72,10 @@ async function openInvoice(id) {
   document.getElementById('dlg-foot').innerHTML = `
     <button class="btn secondary" onclick="setStatus('ignored')">Not a payable</button>
     <button class="btn secondary" onclick="setStatus('disputed')">Disputed</button>
-    <button class="btn secondary" onclick="setStatus('${inv.status === 'paid' ? 'unpaid' : 'paid'}')">${inv.status === 'paid' ? 'Mark unpaid' : 'Mark paid'}</button>
+    ${inv.status === 'paid'
+      ? `<button class="btn secondary" onclick="setStatus('unpaid')">Mark unpaid</button>`
+      : `<span style="display:flex;gap:6px;align-items:center"><input type="date" id="paid-date" value="${new Date().toISOString().slice(0,10)}" title="Payment date">
+         <button class="btn secondary" onclick="markPaidOn(this)">Mark paid</button></span>`}
     <button class="btn secondary" onclick="confirmInv(this)">Looks right ✓</button>
     <button class="btn" onclick="save(this)">Save corrections</button>`;
   dlg.showModal();
@@ -95,6 +99,10 @@ async function save(btn) {
 async function setStatus(st) {
   await api('/api/invoices/' + current.id, {changes: {status: st}, comment: document.getElementById('dlg-comment').value || null});
   toast('Status: ' + st); setTimeout(() => location.reload(), 600);
+}
+async function markPaidOn(btn) {
+  const d = document.getElementById('paid-date').value || null;
+  await busy(btn, async () => { await api(`/api/invoices/${current.id}/paid`, {paid_date: d}); toast('Marked paid' + (d ? ' on ' + d : '')); setTimeout(() => location.reload(), 600); });
 }
 async function confirmInv(btn) { await busy(btn, async () => { await api(`/api/invoices/${current.id}/confirm`); toast('Confirmed – saved as a test case'); setTimeout(() => location.reload(), 600); }); }
 function openNew() {

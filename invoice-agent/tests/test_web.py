@@ -39,3 +39,19 @@ def test_chat_page_has_no_inline_handlers():
         for attr in ("onsubmit=", "onclick=", "onkeydown="):
             assert attr not in html
         assert 'id="chat-send"' in html and "addEventListener('submit'" in html
+
+
+def test_mark_paid_and_undo_endpoints():
+    with client() as c:
+        c.post("/login", data={"username": "admin", "password": "pw"})
+        iid = invoices.upsert_extracted(add_email(), None, inv(), 0)
+        assert 'data-pay="%d"' % iid in c.get("/invoices").text
+        r = c.post(f"/api/invoices/{iid}/paid", json={"paid_date": "2026-11-12"})
+        assert r.status_code == 200 and r.json()["marked_paid"][0]["id"] == iid
+        row = invoices.get_invoice(iid)
+        assert row["status"] == "paid" and row["paid_at"] == "2026-11-12"
+        assert 'data-unpay="%d"' % iid in c.get("/invoices?status=paid").text
+        assert c.post(f"/api/invoices/{iid}/unpaid").status_code == 200
+        row = invoices.get_invoice(iid)
+        assert row["status"] == "unpaid" and row["paid_at"] is None
+        assert c.post("/api/invoices/99999/paid", json={}).status_code == 404

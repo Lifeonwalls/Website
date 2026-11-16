@@ -37,6 +37,36 @@ function toast(msg) { const t = document.getElementById('toast'); t.textContent 
   clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 4000); }
 async function busy(btn, fn) { const label = btn.textContent; btn.disabled = true; btn.textContent = 'Working…';
   try { await fn(); } catch (e) { toast('⚠️ ' + e.message); } finally { btn.disabled = false; btn.textContent = label; } }
+// "Mark paid" buttons anywhere on a page: first click asks to confirm, second click records the payment.
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-pay], button[data-unpay]');
+  if (!btn) return;
+  e.stopPropagation(); e.preventDefault();
+  const row = btn.closest('tr'), cell = btn.parentElement;
+  if (btn.dataset.pay) {
+    if (btn.dataset.armed !== '1') {
+      btn.dataset.armed = '1'; btn.textContent = 'Confirm?'; btn.classList.add('armed');
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.dataset.armed = ''; btn.textContent = 'Mark paid'; btn.classList.remove('armed'); }, 4000);
+      return;
+    }
+    clearTimeout(btn._t); btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      const r = await api(`/api/invoices/${btn.dataset.pay}/paid`, {});
+      const m = r.marked_paid[0] || r.already_paid[0];
+      toast(`${m ? m.invoice_number : 'Invoice'} marked paid`);
+      if (row) row.classList.add('paid-row');
+      cell.innerHTML = `<span class="pill paid">Paid ✓</span> <button class="btn-mini" data-unpay="${btn.dataset.pay}">Undo</button>`;
+    } catch (err) { toast('⚠️ ' + err.message); btn.disabled = false; btn.textContent = 'Mark paid'; btn.dataset.armed = ''; btn.classList.remove('armed'); }
+  } else {
+    btn.disabled = true;
+    try {
+      await api(`/api/invoices/${btn.dataset.unpay}/unpaid`, {});
+      toast('Payment undone');
+      if (row) row.classList.remove('paid-row');
+      cell.innerHTML = `<button class="btn-mini" data-pay="${btn.dataset.unpay}">Mark paid</button>`;
+    } catch (err) { toast('⚠️ ' + err.message); btn.disabled = false; }
+  }
+}, true);  // capture phase: runs before the row's own click handler (which opens the edit window)
 </script>
 {% block scripts %}{% endblock %}
 </body>

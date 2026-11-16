@@ -38,10 +38,11 @@
 
 <div class="grid2">
   <div class="card"><h2>Due in the next 14 days</h2>
-    <table><tr><th>Due</th><th>Supplier</th><th>Invoice</th><th class="num">Amount</th></tr>
+    <table><tr><th>Due</th><th>Supplier</th><th>Invoice</th><th class="num">Amount</th><th></th></tr>
     {% for i in s.detail if i.days_to_due <= 14 %}
-      <tr class="{{ 'overdue' if i.bucket == 'overdue' }}"><td>{{ i.due_date|date }}</td><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td></tr>
-    {% else %}<tr><td colspan="4" class="muted">Nothing due.</td></tr>{% endfor %}</table>
+      <tr class="{{ 'overdue' if i.bucket == 'overdue' }}"><td>{{ i.due_date|date }}</td><td>{{ i.supplier }}</td><td>{{ i.invoice_number }}</td><td class="num">{{ i.amount_due|money(i.currency) }}</td>
+        <td><button class="btn-mini" data-pay="{{ i.id }}">Mark paid</button></td></tr>
+    {% else %}<tr><td colspan="5" class="muted">Nothing due.</td></tr>{% endfor %}</table>
     <p><a href="/invoices">All invoices →</a></p>
   </div>
   <div class="card"><h2>Recent activity</h2>

@@ -244,6 +244,8 @@ def update_invoice(invoice_id: int, changes: dict[str, Any], *, source: str, aut
         applied["due_date_source"] = "stated"
     if applied.get("status") == "paid":
         applied["paid_at"] = now[:10]
+    elif "status" in applied:
+        applied["paid_at"] = None
     if extraction_changed:
         applied["needs_review"] = 0
     applied["locked_fields"] = json.dumps(sorted(locked))
