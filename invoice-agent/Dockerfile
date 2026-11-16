@@ -1,12 +1,22 @@
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
-    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright HOME=/home/app
+# Set to 0 to build without PDF export (smaller image; reports are still produced as HTML):
+#   docker compose build --build-arg ENABLE_PDF=0
+ARG ENABLE_PDF=1
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_ROOT_USER_ACTION=ignore \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 PLAYWRIGHT_BROWSERS_PATH=/ms-playwright HOME=/home/app
 
 WORKDIR /srv
 COPY requirements.txt requirements-pdf.txt ./
-RUN pip install -r requirements.txt -r requirements-pdf.txt \
- && playwright install --with-deps chromium \
+RUN pip install -r requirements.txt \
+ && if [ "$ENABLE_PDF" = "1" ]; then \
+      apt-get update \
+      && apt-get install -y --no-install-recommends libatomic1 \
+      && pip install -r requirements-pdf.txt \
+      && playwright install --with-deps chromium \
+      && rm -rf /var/lib/apt/lists/* ; \
+    fi \
  && useradd --create-home --uid 1000 app \
  && mkdir -p /srv/data /home/app/.claude && chown -R app:app /srv /home/app
 
