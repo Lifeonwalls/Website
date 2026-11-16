@@ -69,6 +69,90 @@ need_docker() {
 
 compose() { docker compose "$@"; }
 
+# --- HTTPS proxy -------------------------------------------------------------
+# If another container already publishes port 443 (e.g. the Caddy in front of n8n), add our site to
+# that Caddy instead of starting a second one that would fight over the ports.
+SHARED_CADDY=""
+SHARED_CADDYFILE=""
+
+find_existing_proxy() {
+  docker ps --format '{{.Names}}|{{.Image}}|{{.Ports}}' \
+    | awk -F'|' '$3 ~ /:443->/ && $1 != "invoice-agent-caddy-1" { print $1 "|" $2; exit }'
+}
+
+caddyfile_on_host() {  # host path of the Caddyfile mounted into container $1
+  local mounts src dst
+  mounts=$(docker inspect "$1" --format '{{range .Mounts}}{{.Source}}|{{.Destination}}{{"\n"}}{{end}}')
+  while IFS='|' read -r src dst; do
+    if [[ $dst == /etc/caddy/Caddyfile && -f $src ]]; then echo "$src"; return; fi
+    if [[ $dst == /etc/caddy && -f $src/Caddyfile ]]; then echo "$src/Caddyfile"; return; fi
+  done <<< "$mounts"
+}
+
+configure_proxy() {
+  local found name image net domain
+  found=$(find_existing_proxy)
+  if [[ -z $found ]]; then
+    set_env PROXY_MODE own
+    set_env COMPOSE_PROFILES caddy
+    set_env COMPOSE_FILE docker-compose.yml
+    return
+  fi
+  name=${found%%|*}; image=${found#*|}
+  bold "HTTPS"
+  info "Container '$name' ($image) already serves ports 80/443 on this server."
+  if [[ $image != *caddy* ]]; then
+    warn "It is not Caddy, so it can't be configured automatically. The agent will join its network;"
+    warn "point $(get_env DOMAIN) at http://payables-agent:8000 in that proxy's settings."
+  fi
+  net=$(docker inspect "$name" --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{"\n"}}{{end}}' | grep -v '^$' | head -n1)
+  set_env PROXY_MODE shared
+  set_env PROXY_NETWORK "$net"
+  set_env COMPOSE_PROFILES ""
+  set_env COMPOSE_FILE "docker-compose.yml:docker-compose.proxy.yml"
+  info "The agent will join Docker network '$net' as 'payables-agent'."
+  if [[ $net == bridge || $net == host ]]; then
+    warn "'$name' is on Docker's '$net' network, where containers can't find each other by name."
+    warn "Ask for help before continuing: the proxy needs its own Docker network first."
+  fi
+  if [[ $image != *caddy* ]]; then return; fi
+
+  SHARED_CADDY=$name
+  SHARED_CADDYFILE=$(caddyfile_on_host "$name")
+  domain=$(get_env DOMAIN)
+  if [[ -z $SHARED_CADDYFILE ]]; then
+    warn "Couldn't find $name's Caddyfile on disk. Add this block to it yourself, then reload Caddy:"
+    printf '\n%s {\n\treverse_proxy payables-agent:8000\n}\n\n' "$domain"
+    SHARED_CADDY=""
+    return
+  fi
+  if grep -qE "^[[:space:]]*${domain//./\\.}([[:space:],{]|$)" "$SHARED_CADDYFILE"; then
+    info "$SHARED_CADDYFILE already has a block for $domain - leaving it unchanged."
+    return
+  fi
+  info "I'll add this site to $SHARED_CADDYFILE (a backup copy is made first; n8n is not touched):"
+  printf '\n    %s {\n        reverse_proxy payables-agent:8000\n    }\n\n' "$domain"
+  read -r -p "  OK to add it? [Y/n] " yn
+  if [[ $yn =~ ^[Nn] ]]; then SHARED_CADDY=""; warn "Skipped - add the block yourself and reload Caddy."; return; fi
+  cp "$SHARED_CADDYFILE" "$SHARED_CADDYFILE.bak.$(date +%Y%m%d%H%M%S)"
+  printf '\n# Payables agent (added by invoice-agent/setup.sh)\n%s {\n\tencode gzip\n\treverse_proxy payables-agent:8000 {\n\t\ttransport http {\n\t\t\tread_timeout 10m\n\t\t}\n\t}\n}\n' \
+    "$domain" >> "$SHARED_CADDYFILE"
+}
+
+reload_shared_caddy() {
+  [[ -z $SHARED_CADDY ]] && return
+  info "Reloading $SHARED_CADDY (validated first; on error the old config stays live)…"
+  if docker exec "$SHARED_CADDY" caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile; then
+    info "Caddy reloaded. The certificate for $(get_env DOMAIN) is requested now (up to a minute)."
+  else
+    local latest; latest=$(ls -t "$SHARED_CADDYFILE".bak.* | head -n1)
+    warn "Reload failed - restoring the previous Caddyfile from $latest."
+    cp "$latest" "$SHARED_CADDYFILE"
+    docker exec "$SHARED_CADDY" caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile || true
+    exit 1
+  fi
+}
+
 main() {
   bold "Payables agent setup"
   need_docker
@@ -147,8 +231,11 @@ main() {
     if [[ $EUID -eq 0 ]]; then ufw allow 80,443/tcp; else sudo ufw allow 80,443/tcp; fi
   fi
 
+  configure_proxy
+
   bold "Starting…"
-  compose up -d
+  compose up -d --remove-orphans
+  if [[ $(get_env PROXY_MODE) == shared ]]; then reload_shared_caddy; fi
   for _ in $(seq 1 30); do
     if compose exec -T agent python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" 2>/dev/null; then
       break

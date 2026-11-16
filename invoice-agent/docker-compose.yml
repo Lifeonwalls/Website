@@ -8,8 +8,11 @@ services:
       - ./claude-sessions:/home/app/.claude  # Agent SDK chat sessions survive restarts
     expose: ["8000"]
 
+  # Own HTTPS proxy - only started when COMPOSE_PROFILES=caddy (servers with nothing else on ports 80/443).
+  # On servers that already run Caddy (e.g. alongside n8n), docker-compose.proxy.yml is used instead.
   caddy:                                 # automatic HTTPS (Let's Encrypt)
     image: caddy:2
+    profiles: ["caddy"]
     restart: unless-stopped
     ports: ["80:80", "443:443"]
     environment:

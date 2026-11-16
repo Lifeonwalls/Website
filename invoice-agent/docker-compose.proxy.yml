@@ -1,0 +1,12 @@
+# Used when the server already has a reverse proxy (e.g. the Caddy that fronts n8n).
+# The agent joins that proxy's Docker network so the proxy can reach it as payables-agent:8000.
+# Enabled by setup.sh via COMPOSE_FILE=docker-compose.yml:docker-compose.proxy.yml and PROXY_NETWORK in .env.
+services:
+  agent:
+    container_name: payables-agent
+    networks: [default, proxy]
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK}

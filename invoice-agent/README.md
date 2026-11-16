@@ -57,7 +57,7 @@ Run the setup:
 ./setup.sh
 ```
 
-`setup.sh` installs Docker if it is missing (it asks first). It asks for each value, hiding secrets as you type, and generates the web password and session secret. It builds the app and tests every connection with `python -m app check`: the API key, the mailbox login and how many emails it can see, the Telegram bot and the chat ids that have messaged it, and DNS. Then it opens the firewall and starts everything behind HTTPS. Re-run it at any time to change a value; press Enter to keep the current one.
+`setup.sh` installs Docker if it is missing (it asks first). It asks for each value, hiding secrets as you type, and generates the web password and session secret. It builds the app and tests every connection with `python -m app check`: the API key, the mailbox login and how many emails it can see, the Telegram bot and the chat ids that have messaged it, and DNS. Then it opens the firewall and starts everything behind HTTPS. **If the server already runs Caddy** (for example the one in front of n8n), it doesn't start a second one. It adds a `payables` site block to the existing Caddyfile (after making a backup and asking you), joins the agent to that Caddy's Docker network, and reloads Caddy. If the reload fails, the old Caddyfile is put back. Re-run it at any time to change a value; press Enter to keep the current one.
 
 You can re-test the settings at any point (this changes nothing):
 ```bash
