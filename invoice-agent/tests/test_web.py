@@ -28,3 +28,14 @@ def test_login_and_pages():
         assert anon.get(f"/r/{rep['share_token']}").status_code == 200
         assert anon.get("/r/wrong").status_code == 404
         assert anon.post("/api/chat", json={"message": "hi"}).status_code == 401
+
+
+def test_chat_page_has_no_inline_handlers():
+    """Inline handlers inside a <form> resolve names against the form's controls first: a button with
+    id="send" silently shadowed the send() function, so clicking Send did nothing."""
+    with client() as c:
+        c.post("/login", data={"username": "admin", "password": "pw"})
+        html = c.get("/chat").text
+        for attr in ("onsubmit=", "onclick=", "onkeydown="):
+            assert attr not in html
+        assert 'id="chat-send"' in html and "addEventListener('submit'" in html

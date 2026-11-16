@@ -314,3 +314,45 @@ def refresh_eval_case(email_id: int) -> None:
 def today_local() -> date:
     from zoneinfo import ZoneInfo
     return datetime.now(ZoneInfo(get_settings().timezone)).date()
+
+
+def mark_paid(*, numbers: list[str], suppliers: list[str], ids: list[int], paid_date: str | None,
+              source: str, author: str | None, comment: str | None) -> dict:
+    """Mark invoices paid by invoice number (as typed by a person) and/or id. Never guesses between matches."""
+    when = (parse_date(paid_date) or today_local()).isoformat() if paid_date else today_local().isoformat()
+    marked, already, not_found, ambiguous = [], [], [], []
+    targets: list[int] = list(ids)
+    for i, raw in enumerate(numbers):
+        key = invoice_number_key(raw)
+        rows = db.rows("SELECT id, supplier, invoice_number, status, amount_due, currency FROM invoices "
+                       "WHERE invoice_number_key=? AND status != 'ignored'", (key,))
+        if len(rows) > 1 and i < len(suppliers) and suppliers[i]:
+            sk = supplier_key(suppliers[i])
+            rows = [r for r in rows if sk in supplier_key(r["supplier"]) or supplier_key(r["supplier"]) in sk]
+        unpaid = [r for r in rows if r["status"] != "paid"]
+        if not rows:
+            not_found.append(raw)
+        elif not unpaid:
+            already.append({"invoice_number": rows[0]["invoice_number"], "supplier": rows[0]["supplier"]})
+        elif len(unpaid) > 1:
+            ambiguous.append({"invoice_number": raw, "candidates": [
+                {"id": r["id"], "supplier": r["supplier"], "amount_due": r["amount_due"]} for r in unpaid]})
+        else:
+            targets.append(unpaid[0]["id"])
+    for iid in dict.fromkeys(targets):
+        inv = get_invoice(iid)
+        if not inv:
+            not_found.append(f"id {iid}")
+            continue
+        if inv["status"] == "paid":
+            already.append({"invoice_number": inv["invoice_number"], "supplier": inv["supplier"]})
+            continue
+        update_invoice(iid, {"status": "paid"}, source=source, author=author, comment=comment)
+        db.execute("UPDATE invoices SET paid_at=? WHERE id=?", (when, iid))
+        marked.append({"id": iid, "supplier": inv["supplier"], "invoice_number": inv["invoice_number"],
+                       "amount_due": inv["amount_due"], "currency": inv["currency"]})
+    total: dict[str, float] = {}
+    for m in marked:
+        total[m["currency"]] = round(total.get(m["currency"], 0) + (m["amount_due"] or 0), 2)
+    return {"marked_paid": marked, "total_marked": total, "already_paid": already, "not_found": not_found,
+            "ambiguous": ambiguous, "paid_date": when}

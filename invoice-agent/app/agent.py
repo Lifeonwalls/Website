@@ -43,8 +43,10 @@ missed, find the email with search_emails and use add_missed_invoice.
 - When someone confirms an invoice is correct, call confirm_invoice.
 - Opinions about the report or the process ("show categories", "leave out X") go to record_feedback with kind \
 "report" or "general". Tell them it will be applied at the next improvement cycle (or run it if they ask).
-- You cannot make payments. Marking an invoice paid only records that it was paid elsewhere. Before marking more \
-than three invoices paid at once, list them and ask for confirmation.
+- You cannot make payments. Marking an invoice paid only records that it was paid elsewhere. When the user names \
+or pastes the invoices that were paid, call mark_paid straight away with all their invoice numbers in ONE call, then \
+report what was marked and anything not found or ambiguous. Only ask for confirmation first when YOU chose the \
+invoices from a vague request (e.g. "mark everything from Travis Perkins as paid") and it is more than three.
 - Be brief and concrete. Use short lists. Format money like £1,234.56 and dates like Mon 17 Nov.
 {channel_hint}"""
 
@@ -148,20 +150,26 @@ def build_tools(source: str, author: str | None) -> list:
         inv = await T(lambda: invoices.confirm_invoice(int(args["invoice_id"]), source=source, author=author))
         return _ok({"confirmed": _slim(inv)})
 
-    @tool("mark_paid", "Record invoices as paid (payment was made outside this system).", {
+    @tool("mark_paid", "Record invoices as paid (payment was made outside this system). Pass invoice_numbers "
+          "exactly as the user wrote them (optionally with supplier names), and/or invoice_ids. Each number is "
+          "matched to one unpaid invoice; unknown or ambiguous numbers are reported back, never guessed.", {
         "type": "object",
-        "properties": {"invoice_ids": {"type": "array", "items": {"type": "integer"}},
-                       "comment": {"type": "string"}},
-        "required": ["invoice_ids"],
+        "properties": {
+            "invoice_numbers": {"type": "array", "items": {"type": "string"}},
+            "suppliers": {"type": "array", "items": {"type": "string"},
+                          "description": "Optional, same order as invoice_numbers, to tell apart duplicates"},
+            "invoice_ids": {"type": "array", "items": {"type": "integer"}},
+            "paid_date": {"type": "string", "description": "YYYY-MM-DD if the user gave one"},
+            "comment": {"type": "string"},
+        },
     })
     @_guard
     async def mark_paid(args: dict) -> dict:
-        done = []
-        for iid in args["invoice_ids"]:
-            inv = await T(lambda i=iid: invoices.update_invoice(int(i), {"status": "paid"}, source=source, author=author,
-                                                                comment=args.get("comment")))
-            done.append(_slim(inv))
-        return _ok({"marked_paid": done})
+        res = await T(lambda: invoices.mark_paid(
+            numbers=args.get("invoice_numbers") or [], suppliers=args.get("suppliers") or [],
+            ids=args.get("invoice_ids") or [], paid_date=args.get("paid_date"),
+            source=source, author=author, comment=args.get("comment")))
+        return _ok(res)
 
     @tool("add_missed_invoice", "Add an invoice the extractor missed. Required fields: supplier, invoice_number, "
           "amount_due, due_date. Link email_id when known so the extractor learns from it.", {
@@ -277,7 +285,7 @@ def _options(source: str, author: str | None, resume: str | None) -> ClaudeAgent
         setting_sources=[],
         cwd=str(s.data_dir.resolve()),
         model=s.agent_model,
-        max_turns=25,
+        max_turns=40,
         max_budget_usd=s.agent_max_budget_usd,
         resume=resume,
         env=env,

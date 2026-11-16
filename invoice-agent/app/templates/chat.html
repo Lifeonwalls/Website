@@ -2,18 +2,18 @@
 {% block title %}Ask the agent{% endblock %}
 {% block content %}
 <div class="toolbar"><h1 style="margin:0;flex:1">Ask the agent</h1>
-  <button class="btn secondary" onclick="api('/api/chat/reset').then(() => { log.innerHTML = ''; toast('New conversation'); })">New conversation</button></div>
+  <button class="btn secondary" id="chat-reset" type="button">New conversation</button></div>
 <div class="chat">
   <div class="log" id="log">
     <div class="msg bot">Hi! I can answer questions about invoices to pay, correct extracted data, mark invoices paid, build the board report and learn from your feedback.</div>
   </div>
   <div class="chips">
     {% for q in ['What do we need to pay in the next 7 days?', 'Which invoices are overdue?', 'Show invoices that need checking', 'Build the board report', 'What have you learned so far?'] %}
-    <span class="chip" onclick="send('{{ q }}')">{{ q }}</span>{% endfor %}
+    <button type="button" class="chip" data-q="{{ q }}">{{ q }}</button>{% endfor %}
   </div>
-  <form onsubmit="event.preventDefault(); send(input.value)">
-    <textarea id="input" placeholder="e.g. Invoice 4471 from Acme is actually due on 30 Nov" onkeydown="if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); send(this.value); }"></textarea>
-    <button class="btn" id="send">Send</button>
+  <form id="chat-form">
+    <textarea id="chat-input" placeholder="e.g. Invoice 4471 from Acme is actually due on 30 Nov. Shift+Enter for a new line."></textarea>
+    <button class="btn" id="chat-send" type="submit">Send</button>
   </form>
 </div>
 {% endblock %}
@@ -21,18 +21,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
 <script>
-const log = document.getElementById('log'), input = document.getElementById('input'), sendBtn = document.getElementById('send');
-function add(role, text) {
+// Handlers are attached here (not inline) so form control ids can never shadow these functions.
+const chatLog = document.getElementById('log');
+const chatInput = document.getElementById('chat-input');
+const chatSend = document.getElementById('chat-send');
+const render = text => (window.marked && window.DOMPurify) ? DOMPurify.sanitize(marked.parse(text))
+  : text.replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c])).replace(/\n/g, '<br>');
+function addMsg(role, text) {
   const d = document.createElement('div'); d.className = 'msg ' + role;
-  if (role === 'bot') d.innerHTML = DOMPurify.sanitize(marked.parse(text)); else d.textContent = text;
-  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+  if (role === 'bot') d.innerHTML = render(text); else d.textContent = text;
+  chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight; return d;
 }
-async function send(text) {
-  text = (text || '').trim(); if (!text || sendBtn.disabled) return;
-  input.value = ''; add('user', text); const wait = add('bot', '_Thinking…_'); sendBtn.disabled = true;
-  try { const r = await api('/api/chat', {message: text}); wait.innerHTML = DOMPurify.sanitize(marked.parse(r.answer)); }
+async function sendChat(text) {
+  text = (text || '').trim(); if (!text || chatSend.disabled) return;
+  chatInput.value = ''; addMsg('user', text); const wait = addMsg('bot', '_Thinking…_');
+  chatSend.disabled = true; chatSend.textContent = 'Working…';
+  try { const r = await api('/api/chat', {message: text}); wait.innerHTML = render(r.answer); }
   catch (e) { wait.textContent = '⚠️ ' + e.message; }
-  finally { sendBtn.disabled = false; log.scrollTop = log.scrollHeight; input.focus(); }
+  finally { chatSend.disabled = false; chatSend.textContent = 'Send'; chatLog.scrollTop = chatLog.scrollHeight; chatInput.focus(); }
 }
+document.getElementById('chat-form').addEventListener('submit', e => { e.preventDefault(); sendChat(chatInput.value); });
+chatInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(chatInput.value); } });
+document.querySelectorAll('.chip[data-q]').forEach(b => b.addEventListener('click', () => sendChat(b.dataset.q)));
+document.getElementById('chat-reset').addEventListener('click', () =>
+  api('/api/chat/reset').then(() => { chatLog.innerHTML = ''; toast('New conversation'); }));
 </script>
 {% endblock %}

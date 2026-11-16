@@ -164,3 +164,24 @@ def test_improvement_cycle_accepts_fix_and_rejects_regression(monkeypatch):
     monkeypatch.setattr(improve.pipeline, "process_email", lambda eid: {})
     improve.apply_version(res["version"])
     assert playbook.get_active()[0] == res["version"]
+
+
+def test_mark_paid_by_numbers():
+    e = add_email()
+    a = invoices.upsert_extracted(e, None, inv(supplier="Metro Timber", invoice_number="2502-113161", amount_due=239.76), 0)
+    b = invoices.upsert_extracted(e, None, inv(supplier="Energy & Environmental Alliance Ltd", invoice_number="INV-0262", amount_due=1200), 0)
+    invoices.upsert_extracted(e, None, inv(supplier="Acme", invoice_number="DUP-1"), 0)
+    invoices.upsert_extracted(e, None, inv(supplier="Other Co", invoice_number="DUP-1"), 0)
+    res = invoices.mark_paid(numbers=["2502-113161", "inv 0262", "NOPE-9", "DUP-1"], suppliers=[], ids=[],
+                             paid_date="2026-11-10", source="web", author="t", comment=None)
+    assert {m["id"] for m in res["marked_paid"]} == {a, b}
+    assert res["total_marked"] == {"GBP": 1439.76}
+    assert res["not_found"] == ["NOPE-9"] and res["ambiguous"][0]["invoice_number"] == "DUP-1"
+    assert invoices.get_invoice(a)["status"] == "paid" and invoices.get_invoice(a)["paid_at"] == "2026-11-10"
+    again = invoices.mark_paid(numbers=["2502-113161"], suppliers=[], ids=[], paid_date=None, source="web",
+                               author="t", comment=None)
+    assert again["already_paid"] and not again["marked_paid"]
+    # supplier disambiguates duplicates
+    res2 = invoices.mark_paid(numbers=["DUP-1"], suppliers=["Other Co Ltd"], ids=[], paid_date=None, source="web",
+                              author="t", comment=None)
+    assert [m["supplier"] for m in res2["marked_paid"]] == ["Other Co"]

@@ -60,7 +60,7 @@ dialog::backdrop { background: rgba(47,51,35,.45); }
 .msg.bot { background: #fff; border-bottom-left-radius: 3px; }
 .msg.bot table { margin: 6px 0; } .msg.bot p { margin: 4px 0; }
 .chat form { display: flex; gap: 8px; margin-top: 10px; }
-.chat textarea { flex: 1; resize: none; height: 46px; }
+.chat textarea { flex: 1; resize: vertical; min-height: 46px; max-height: 40vh; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .chip { background: #fff; border: 1px solid var(--rule); border-radius: 14px; padding: 4px 10px; font-size: 12px; cursor: pointer; }
 .bar { fill: var(--olive); } .bar.overdue { fill: var(--critical); }
