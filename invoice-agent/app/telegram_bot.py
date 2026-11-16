@@ -212,8 +212,26 @@ async def on_text(update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
                 source="telegram", author=_author(update), kind="report", comment=text,
                 target_type="report", target_id=rid))
             text = f"[This message is feedback on board report #{rid}; it has already been recorded as report feedback.]\n{text}"
-        await ctx.bot.send_chat_action(update.effective_chat.id, ChatAction.TYPING)
-        answer = await agent.ask(f"telegram:{update.effective_chat.id}", text, source="telegram", author=_author(update))
+        log.info("Telegram message from chat %s (%s): %s", update.effective_chat.id, _author(update), text[:200])
+
+        async def keep_typing():  # Telegram's "typing…" lasts 5 s; keep it up while the agent works
+            while True:
+                try:
+                    await ctx.bot.send_chat_action(update.effective_chat.id, ChatAction.TYPING)
+                except Exception:
+                    pass
+                await asyncio.sleep(4)
+
+        typing = asyncio.create_task(keep_typing())
+        try:
+            answer = await asyncio.wait_for(
+                agent.ask(f"telegram:{update.effective_chat.id}", text, source="telegram", author=_author(update)),
+                timeout=300)
+        except asyncio.TimeoutError:
+            answer = "Sorry, that took too long (over 5 minutes) and was stopped. Please try again or ask in smaller steps."
+        finally:
+            typing.cancel()
+        log.info("Agent replied to chat %s (%d chars)", update.effective_chat.id, len(answer))
         for i in range(0, len(answer), 4000):
             await msg.reply_text(answer[i:i + 4000])
     await _guarded(update, run)
