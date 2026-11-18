@@ -1,4 +1,4 @@
-const DASH = 'https://claude.ai/artifact/RSnmPxLaqs1bg9NrkLR4TX';
+const DASH = 'https://n8n.lifeonwalls.co.uk/webhook/partner-dashboard/<private-token>'; // real token is set in the n8n workflow only
 const PARTNERS = {'evergreen-exterior-services': 'Evergreen Exterior Services', 'ilo-bloom': 'Ilo Bloom'};
 const LINKS = {website: 'Website', shop: 'Online shop', instagram: 'Instagram', directions: 'Directions', other: 'Other'};
 
