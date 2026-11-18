@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#3E7B3A"/>
+    </marker>
+    <filter id="sh" x="-10%" y="-10%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1F3D2B" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="#F6F4EE"/>
+
+  <text x="800" y="96" text-anchor="middle" font-size="40" font-weight="700" fill="#1F3D2B">From invoice to 30-day forecast</text>
+  <text x="800" y="138" text-anchor="middle" font-size="20" fill="#6B776F">Every bill captured once, tagged to a job and scheduled by due date</text>
+
+  <!-- sources column -->
+  <g font-size="16" fill="#2B3A30">
+    <rect x="80" y="230" width="230" height="64" rx="12" fill="#FFFFFF" stroke="#DCD8CC"/>
+    <text x="195" y="268" text-anchor="middle">Supplier emails</text>
+    <rect x="80" y="314" width="230" height="64" rx="12" fill="#FFFFFF" stroke="#DCD8CC"/>
+    <text x="195" y="352" text-anchor="middle">WhatsApp &amp; photos</text>
+    <rect x="80" y="398" width="230" height="64" rx="12" fill="#FFFFFF" stroke="#DCD8CC"/>
+    <text x="195" y="436" text-anchor="middle">Card receipts</text>
+    <rect x="80" y="482" width="230" height="64" rx="12" fill="#FFFFFF" stroke="#DCD8CC"/>
+    <text x="195" y="520" text-anchor="middle">Salaries, rent, card bill</text>
+  </g>
+  <text x="195" y="206" text-anchor="middle" font-size="14" font-weight="700" fill="#6B776F" letter-spacing="1.5">SOURCES</text>
+
+  <!-- arrows into inbox -->
+  <g stroke="#3E7B3A" stroke-width="2.5" fill="none" marker-end="url(#ar)">
+    <path d="M310 262 C350 262 350 380 382 380"/>
+    <path d="M310 346 C345 346 345 384 382 384"/>
+    <path d="M310 430 C345 430 345 392 382 392"/>
+  </g>
+
+  <!-- step cards -->
+  <g filter="url(#sh)">
+    <rect x="390" y="290" width="240" height="200" rx="16" fill="#FFFFFF"/>
+    <rect x="690" y="290" width="240" height="200" rx="16" fill="#FFFFFF"/>
+    <rect x="990" y="290" width="240" height="200" rx="16" fill="#FFFFFF"/>
+    <rect x="1290" y="290" width="240" height="200" rx="16" fill="#1F3D2B"/>
+  </g>
+
+  <!-- step numbers -->
+  <g font-size="15" font-weight="700" text-anchor="middle">
+    <circle cx="430" cy="330" r="18" fill="#A7C957"/><text x="430" y="335" fill="#1F3D2B">1</text>
+    <circle cx="730" cy="330" r="18" fill="#A7C957"/><text x="730" y="335" fill="#1F3D2B">2</text>
+    <circle cx="1030" cy="330" r="18" fill="#A7C957"/><text x="1030" y="335" fill="#1F3D2B">3</text>
+    <circle cx="1330" cy="330" r="18" fill="#A7C957"/><text x="1330" y="335" fill="#1F3D2B">4</text>
+  </g>
+
+  <g fill="#1F3D2B">
+    <text x="414" y="386" font-size="22" font-weight="700">Accounts inbox</text>
+    <text x="414" y="418" font-size="15" fill="#5B675F">One address for every</text>
+    <text x="414" y="440" font-size="15" fill="#5B675F">invoice and receipt</text>
+
+    <text x="714" y="386" font-size="22" font-weight="700">AI extraction</text>
+    <text x="714" y="418" font-size="15" fill="#5B675F">Supplier, amount, VAT,</text>
+    <text x="714" y="440" font-size="15" fill="#5B675F">job tag and due date</text>
+
+    <text x="1014" y="386" font-size="22" font-weight="700">QuickBooks</text>
+    <text x="1014" y="418" font-size="15" fill="#5B675F">Logged to the ledger and</text>
+    <text x="1014" y="440" font-size="15" fill="#5B675F">costed to the project</text>
+
+    <text x="1314" y="386" font-size="22" font-weight="700" fill="#FFFFFF">30-day dashboard</text>
+    <text x="1314" y="418" font-size="15" fill="#CFE0C3">Due dates, totals and</text>
+    <text x="1314" y="440" font-size="15" fill="#CFE0C3">red / amber / green</text>
+  </g>
+
+  <!-- connecting arrows -->
+  <g stroke="#3E7B3A" stroke-width="3" fill="none" marker-end="url(#ar)">
+    <line x1="632" y1="390" x2="684" y2="390"/>
+    <line x1="932" y1="390" x2="984" y2="390"/>
+    <line x1="1232" y1="390" x2="1284" y2="390"/>
+  </g>
+  <!-- fixed costs feed to dashboard -->
+  <path d="M310 514 C900 514 1300 560 1410 494" stroke="#A7C957" stroke-width="2.5" stroke-dasharray="7 6" fill="none" marker-end="url(#ar)"/>
+  <text x="860" y="550" font-size="14" fill="#6B776F" text-anchor="middle">Known monthly costs added straight to the forecast</text>
+
+  <!-- extracted fields chip strip -->
+  <g font-size="14" fill="#1F3D2B">
+    <text x="800" y="640" text-anchor="middle" font-size="14" font-weight="700" fill="#6B776F" letter-spacing="1.5">CAPTURED FOR EVERY INVOICE</text>
+    <rect x="248" y="666" width="134" height="40" rx="20" fill="#E5EDD9"/><text x="315" y="691" text-anchor="middle">Supplier</text>
+    <rect x="394" y="666" width="146" height="40" rx="20" fill="#E5EDD9"/><text x="467" y="691" text-anchor="middle">Invoice no.</text>
+    <rect x="552" y="666" width="128" height="40" rx="20" fill="#E5EDD9"/><text x="616" y="691" text-anchor="middle">Amount</text>
+    <rect x="692" y="666" width="96" height="40" rx="20" fill="#E5EDD9"/><text x="740" y="691" text-anchor="middle">VAT</text>
+    <rect x="800" y="666" width="160" height="40" rx="20" fill="#E5EDD9"/><text x="880" y="691" text-anchor="middle">Invoice date</text>
+    <rect x="972" y="666" width="196" height="40" rx="20" fill="#E5EDD9"/><text x="1070" y="691" text-anchor="middle">Due date (30-day)</text>
+    <rect x="1180" y="666" width="172" height="40" rx="20" fill="#E5EDD9"/><text x="1266" y="691" text-anchor="middle">Project / job</text>
+  </g>
+
+  <text x="800" y="800" text-anchor="middle" font-size="16" fill="#8A948D">Accounts-only · Director &amp; bookkeeper access · Feeds weekly budget-vs-actual reporting</text>
+</svg>

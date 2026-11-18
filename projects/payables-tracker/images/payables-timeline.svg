@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect width="1600" height="900" fill="#1F3D2B"/>
+  <g opacity="0.07" fill="#A7C957">
+    <path d="M1500 40c-140 30-210 130-190 260 130-20 220-120 190-260z"/>
+  </g>
+
+  <text x="120" y="130" font-size="20" font-weight="700" fill="#A7C957" letter-spacing="2">PAYABLES TRACKER</text>
+  <text x="120" y="190" font-size="46" font-weight="700" fill="#FFFFFF">Every payment, before it's due</text>
+  <text x="120" y="232" font-size="20" fill="#CFE0C3">Outgoing payments over the next 30 days, by due date · sample data</text>
+
+  <!-- axis -->
+  <line x1="160" y1="560" x2="1440" y2="560" stroke="#5E8A68" stroke-width="3"/>
+  <!-- today marker -->
+  <line x1="200" y1="330" x2="200" y2="700" stroke="#A7C957" stroke-width="2" stroke-dasharray="6 6"/>
+  <rect x="160" y="300" width="80" height="30" rx="15" fill="#A7C957"/>
+  <text x="200" y="321" text-anchor="middle" font-size="14" font-weight="700" fill="#1F3D2B">TODAY</text>
+
+  <!-- week ticks: 30 days from x=200 to x=1400 → 40px/day -->
+  <g fill="#9FBFA6" font-size="15" text-anchor="middle">
+    <line x1="480" y1="550" x2="480" y2="570" stroke="#5E8A68" stroke-width="2"/><text x="480" y="600">+7 days</text>
+    <line x1="760" y1="550" x2="760" y2="570" stroke="#5E8A68" stroke-width="2"/><text x="760" y="600">+14 days</text>
+    <line x1="1040" y1="550" x2="1040" y2="570" stroke="#5E8A68" stroke-width="2"/><text x="1040" y="600">+21 days</text>
+    <line x1="1400" y1="550" x2="1400" y2="570" stroke="#5E8A68" stroke-width="2"/><text x="1400" y="600">+30 days</text>
+  </g>
+  <!-- amber zone first 7 days -->
+  <rect x="200" y="545" width="280" height="30" fill="#D9A441" opacity="0.25"/>
+
+  <!-- payments as bubbles: r ~ sqrt(amount) -->
+  <!-- overdue at -2 days x=120? keep at 172 -->
+  <g>
+    <circle cx="170" cy="560" r="17" fill="#E0614F"/>
+    <circle cx="280" cy="560" r="20" fill="#D9A441"/>
+    <circle cx="320" cy="560" r="38" fill="#D9A441"/>
+    <circle cx="400" cy="560" r="23" fill="#D9A441"/>
+    <circle cx="560" cy="560" r="25" fill="#7BB661"/>
+    <circle cx="640" cy="560" r="33" fill="#7BB661"/>
+    <circle cx="720" cy="560" r="18" fill="#7BB661"/>
+    <circle cx="920" cy="560" r="52" fill="#A7C957"/>
+    <circle cx="1000" cy="560" r="20" fill="#7BB661"/>
+    <circle cx="1120" cy="560" r="26" fill="#7BB661"/>
+    <circle cx="1240" cy="560" r="35" fill="#7BB661"/>
+    <circle cx="1340" cy="560" r="19" fill="#7BB661"/>
+  </g>
+
+  <!-- callouts -->
+  <g font-size="15">
+    <line x1="170" y1="543" x2="170" y2="470" stroke="#E0614F" stroke-width="1.5"/>
+    <text x="120" y="440" fill="#FFB4A8" font-weight="700">Overdue</text>
+    <text x="120" y="462" fill="#FFFFFF">£1,280</text>
+
+    <line x1="320" y1="522" x2="320" y2="400" stroke="#D9A441" stroke-width="1.5"/>
+    <text x="300" y="370" fill="#F2CF86" font-weight="700">Steel fabrication</text>
+    <text x="300" y="392" fill="#FFFFFF">£6,450 · Project P-214</text>
+
+    <line x1="920" y1="508" x2="920" y2="400" stroke="#A7C957" stroke-width="1.5"/>
+    <text x="900" y="370" fill="#D6EBB0" font-weight="700">Payroll &amp; rent</text>
+    <text x="900" y="392" fill="#FFFFFF">£12,400 · fixed costs</text>
+
+    <line x1="1240" y1="595" x2="1240" y2="660" stroke="#7BB661" stroke-width="1.5"/>
+    <text x="1180" y="688" fill="#BFE0A9" font-weight="700">Lighting &amp; pumps</text>
+    <text x="1180" y="710" fill="#FFFFFF">£3,120 · Project P-221</text>
+
+    <line x1="640" y1="593" x2="640" y2="660" stroke="#7BB661" stroke-width="1.5"/>
+    <text x="580" y="688" fill="#BFE0A9" font-weight="700">Panel systems</text>
+    <text x="580" y="710" fill="#FFFFFF">£4,980 · Project P-214</text>
+  </g>
+
+  <!-- footer stats -->
+  <line x1="120" y1="770" x2="1480" y2="770" stroke="#2F5D3F"/>
+  <g>
+    <text x="120" y="830" font-size="34" font-weight="700" fill="#FFFFFF">£48,620</text>
+    <text x="120" y="858" font-size="15" fill="#9FBFA6">due in the next 30 days</text>
+    <text x="520" y="830" font-size="34" font-weight="700" fill="#F2CF86">£11,940</text>
+    <text x="520" y="858" font-size="15" fill="#9FBFA6">due in the next 7 days</text>
+    <text x="920" y="830" font-size="34" font-weight="700" fill="#FFFFFF">23</text>
+    <text x="920" y="858" font-size="15" fill="#9FBFA6">payments scheduled</text>
+    <g font-size="14" fill="#CFE0C3">
+      <circle cx="1220" cy="808" r="7" fill="#E0614F"/><text x="1236" y="813">Overdue</text>
+      <circle cx="1220" cy="834" r="7" fill="#D9A441"/><text x="1236" y="839">Due within 7 days</text>
+      <circle cx="1420" cy="808" r="7" fill="#7BB661"/><text x="1436" y="813">Supplier</text>
+      <circle cx="1420" cy="834" r="7" fill="#A7C957"/><text x="1436" y="839">Fixed cost</text>
+    </g>
+  </g>
+</svg>
