@@ -62,8 +62,8 @@
     <text x="1014" y="440" font-size="15" fill="#5B675F">costed to the project</text>
 
     <text x="1314" y="386" font-size="22" font-weight="700" fill="#FFFFFF">30-day dashboard</text>
-    <text x="1314" y="418" font-size="15" fill="#CFE0C3">Due dates, totals and</text>
-    <text x="1314" y="440" font-size="15" fill="#CFE0C3">red / amber / green</text>
+    <text x="1314" y="418" font-size="15" fill="#CFE0C3">+ Telegram assistant</text>
+    <text x="1314" y="440" font-size="15" fill="#CFE0C3">for reports on demand</text>
   </g>
 
   <!-- connecting arrows -->
@@ -88,5 +88,5 @@
     <rect x="1180" y="666" width="172" height="40" rx="20" fill="#E5EDD9"/><text x="1266" y="691" text-anchor="middle">Project / job</text>
   </g>
 
-  <text x="800" y="800" text-anchor="middle" font-size="16" fill="#8A948D">Accounts-only · Director &amp; bookkeeper access · Feeds weekly budget-vs-actual reporting</text>
+  <text x="800" y="800" text-anchor="middle" font-size="16" fill="#8A948D">Accounts-only · Director &amp; bookkeeper access · Live · Replaces 3–4 hours of manual work a week</text>
 </svg>

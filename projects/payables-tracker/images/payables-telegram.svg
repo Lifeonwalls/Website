@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <clipPath id="screen"><rect x="960" y="70" width="400" height="760" rx="44"/></clipPath>
+    <filter id="sh" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#0B1A11" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="#1F3D2B"/>
+  <g opacity="0.07" fill="#A7C957">
+    <path d="M1560 600c-140 30-210 130-190 260 130-20 220-120 190-260z"/>
+  </g>
+
+  <!-- left copy -->
+  <text x="120" y="200" font-size="20" font-weight="700" fill="#A7C957" letter-spacing="2">TELEGRAM AI ASSISTANT</text>
+  <text x="120" y="262" font-size="48" font-weight="700" fill="#FFFFFF">Payables reports,</text>
+  <text x="120" y="320" font-size="48" font-weight="700" fill="#FFFFFF">just by asking</text>
+  <text x="120" y="372" font-size="20" fill="#CFE0C3">Management stays informed and asks for custom</text>
+  <text x="120" y="400" font-size="20" fill="#CFE0C3">reports on the go, with no spreadsheet needed.</text>
+
+  <g font-size="19" fill="#FFFFFF">
+    <circle cx="132" cy="470" r="12" fill="#A7C957"/><path d="M126 470l4 4 8-8" stroke="#1F3D2B" stroke-width="2.5" fill="none"/>
+    <text x="160" y="477">Regular updates on what's due</text>
+    <circle cx="132" cy="520" r="12" fill="#A7C957"/><path d="M126 520l4 4 8-8" stroke="#1F3D2B" stroke-width="2.5" fill="none"/>
+    <text x="160" y="527">Ask by project, supplier or date</text>
+    <circle cx="132" cy="570" r="12" fill="#A7C957"/><path d="M126 570l4 4 8-8" stroke="#1F3D2B" stroke-width="2.5" fill="none"/>
+    <text x="160" y="577">Answers in seconds, from anywhere</text>
+  </g>
+
+  <rect x="120" y="640" width="380" height="120" rx="16" fill="#2A4E37"/>
+  <text x="150" y="708" font-size="52" font-weight="700" fill="#F2CF86">3–4 hrs</text>
+  <text x="350" y="694" font-size="17" fill="#CFE0C3">of manual work</text>
+  <text x="350" y="718" font-size="17" fill="#CFE0C3">saved every week</text>
+
+  <!-- phone -->
+  <g filter="url(#sh)">
+    <rect x="944" y="54" width="432" height="792" rx="58" fill="#0E1A13"/>
+  </g>
+  <g clip-path="url(#screen)">
+    <rect x="960" y="70" width="400" height="760" fill="#E8EEE4"/>
+    <!-- header -->
+    <rect x="960" y="70" width="400" height="104" fill="#2E5A3C"/>
+    <circle cx="1012" cy="134" r="22" fill="#A7C957"/>
+    <text x="1012" y="141" text-anchor="middle" font-size="17" font-weight="700" fill="#1F3D2B">AI</text>
+    <text x="1046" y="130" font-size="18" font-weight="700" fill="#FFFFFF">Accounts Assistant</text>
+    <text x="1046" y="152" font-size="13" fill="#CFE0C3">bot · online</text>
+
+    <!-- msg 1: bot update -->
+    <rect x="976" y="192" width="300" height="134" rx="16" fill="#FFFFFF"/>
+    <g font-size="14" fill="#1F2A22">
+      <text x="992" y="218" font-weight="700" fill="#2E5A3C">Monday payables update</text>
+      <text x="992" y="244">Next 30 days: <tspan font-weight="700">£48,620</tspan> (23)</text>
+      <text x="992" y="266">Due this week: <tspan font-weight="700" fill="#B7791F">£11,940</tspan></text>
+      <text x="992" y="288">Overdue: <tspan font-weight="700" fill="#C0392B">£1,280</tspan> · Irrigation</text>
+      <text x="992" y="310">New invoices received: 4</text>
+    </g>
+    <text x="1262" y="318" font-size="11" fill="#8A948D" text-anchor="end">08:00</text>
+
+    <!-- msg 2: user -->
+    <rect x="1090" y="342" width="254" height="48" rx="16" fill="#CDE8B5"/>
+    <text x="1106" y="371" font-size="14" fill="#1F2A22">What do we owe on P-214?</text>
+
+    <!-- msg 3: bot -->
+    <rect x="976" y="406" width="300" height="114" rx="16" fill="#FFFFFF"/>
+    <g font-size="14" fill="#1F2A22">
+      <text x="992" y="432" font-weight="700" fill="#2E5A3C">P-214: 2 invoices, £11,430</text>
+      <text x="992" y="458">Steel Fabrication · £6,450</text>
+      <text x="992" y="478" fill="#B7791F" font-size="13">due Fri 20 Nov</text>
+      <text x="992" y="502">Panel Systems · £4,980</text>
+    </g>
+    <text x="1262" y="512" font-size="11" fill="#8A948D" text-anchor="end">10:42</text>
+
+    <!-- msg 4: user -->
+    <rect x="1066" y="536" width="278" height="48" rx="16" fill="#CDE8B5"/>
+    <text x="1082" y="565" font-size="14" fill="#1F2A22">Everything due before 1 Dec?</text>
+
+    <!-- msg 5: bot -->
+    <rect x="976" y="600" width="300" height="134" rx="16" fill="#FFFFFF"/>
+    <g font-size="14" fill="#1F2A22">
+      <text x="992" y="626" font-weight="700" fill="#2E5A3C">3 payments, £10,040</text>
+      <circle cx="998" cy="648" r="5" fill="#C0392B"/><text x="1010" y="653">Irrigation · £1,280 (overdue)</text>
+      <circle cx="998" cy="672" r="5" fill="#D9A441"/><text x="1010" y="677">Steel Fab. · £6,450 · 20 Nov</text>
+      <circle cx="998" cy="696" r="5" fill="#D9A441"/><text x="1010" y="701">Nursery Plants · £2,310 · 23 Nov</text>
+      <text x="992" y="724" font-size="13" fill="#2E5A3C" font-weight="600">Full report attached (PDF)</text>
+    </g>
+
+    <!-- input bar -->
+    <rect x="960" y="760" width="400" height="70" fill="#FFFFFF"/>
+    <rect x="976" y="774" width="306" height="40" rx="20" fill="#EEF1EB"/>
+    <text x="996" y="799" font-size="14" fill="#8A948D">Ask for a report…</text>
+    <circle cx="1314" cy="794" r="20" fill="#2E5A3C"/>
+    <path d="M1306 794h14M1314 787l7 7-7 7" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
