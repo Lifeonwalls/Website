@@ -34,14 +34,14 @@ Results
 
 ## Skills (6)
 
-1. Process Automation
-2. Artificial Intelligence (AI)
-3. Accounts Payable
-4. QuickBooks
-5. Data Visualization
-6. Chatbot Development
+1. Large Language Models (LLM)
+2. AI Agents
+3. Natural Language Processing (NLP)
+4. Prompt Engineering
+5. Intelligent Document Processing
+6. Conversational AI
 
-Alternatives if you'd rather swap one: Cash Flow Forecasting, Workflow Automation, Financial Reporting.
+Alternatives, if you used them on this project: Python, LangChain, Generative AI, API Integration.
 
 ---
 
