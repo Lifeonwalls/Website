@@ -23,6 +23,7 @@ ILO_URL = SITE + "/partners/ilo-bloom/"
 top = (SRC / "top.html").read_text()
 foot = (SRC / "foot.html").read_text()
 init = (SRC / "init-slim.js.html").read_text()
+track = (SRC / "track.js.html").read_text().strip()
 
 top = top.replace("lh-jectwestin-", "lh-prtnr-")
 foot = foot.replace("lh-jectwestin-", "lh-prtnr-")
@@ -201,7 +202,7 @@ LOW_ORG = {"@type": "Organization", "@id": SITE + "/#organization", "name": "Lif
 def page(body, graph):
     return ("<!-- wp:html -->\n" + schema(graph) + FONTS + top.split("<header", 1)[0].replace(
         "</style>", "</style>" + EXTRA_CSS, 1) + "<header" + top.split("<header", 1)[1]
-            + '<main id="main">' + body + "</main>" + foot + LIBS + init + "\n<!-- /wp:html -->\n")
+            + '<main id="main">' + body + "</main>" + foot + LIBS + init + "\n" + track + "\n<!-- /wp:html -->\n")
 
 
 # ---------------------------------------------------------------- images
